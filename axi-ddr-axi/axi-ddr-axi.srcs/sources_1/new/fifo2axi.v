@@ -23,6 +23,8 @@
 module fifo2axi#(
     	parameter FDW = 32
     ,	parameter FAW = 8
+        // Horizontal resolution
+    ,   parameter pixels_horizontal = 1280
 	
 		// Base address of targeted slave
 	,   parameter  C_M_TARGET_SLAVE_BASE_ADDR	= 32'h40000000
@@ -180,11 +182,11 @@ module fifo2axi#(
 //----------------------------------------------------
 // FIFO read interface
     ,   input   wire           	frd_start
-    ,   output  reg            	frd_rdy  
+    ,   output  wire           	frd_rdy  
     ,   input   wire           	frd_vld  
     ,   input   wire [FDW-1:0] 	frd_din  
     ,   input   wire           	frd_empty
-    ,   input   reg  [FAW:0] 	frd_cnt  
+    ,   input   wire [FAW:0] 	frd_cnt  
 );
 
 
@@ -244,7 +246,7 @@ module fifo2axi#(
 	//read beat count in a burst
 	reg [C_TRANSACTIONS_NUM : 0] 	read_index;
 	//size of C_M_AXI_BURST_LEN length burst in bytes
-	wire [C_TRANSACTIONS_NUM+2 : 0] 	burst_size_bytes;
+	wire [C_TRANSACTIONS_NUM+4 : 0] 	burst_size_bytes;
 	//The burst counters are used to track the number of burst transfers of C_M_AXI_BURST_LEN burst length needed to transfer 2^C_MASTER_LENGTH bytes of data.
 	reg [C_NO_BURSTS_REQ : 0] 	write_burst_counter;
 	reg [C_NO_BURSTS_REQ : 0] 	read_burst_counter;
@@ -417,7 +419,8 @@ module fifo2axi#(
 			axi_wvalid <= 1'b0;                                                         
 		end                                                                           
 		// If previously not valid, start next transaction                              
-		else if (~axi_wvalid && start_single_burst_write) begin                                                                         
+		//else if (~axi_wvalid && start_single_burst_write) begin                      
+		else if (~axi_wvalid && M_AXI_AWREADY && axi_awvalid) begin                                                                         
 			axi_wvalid <= 1'b1;                                                         
 		end                                                                           
 		/* If WREADY and too many writes, throttle WVALID                               
@@ -478,17 +481,22 @@ module fifo2axi#(
 	 Data pattern is only a simple incrementing count from 0 for each burst  */         
 	always @(posedge M_AXI_ACLK) begin                                                                             
 		if (M_AXI_ARESETN == 0 || init_txn_pulse == 1'b1) begin                                                        
-			axi_wdata <= 1'b1;                                  
+			axi_wdata <= ~128'h0;                                  
 		end                           
 		//else if (wnext && axi_wlast)                                                  
-		//  axi_wdata <= 'b0;                                                           
+		//  axi_wdata <= 'b0;      
+		else if (M_AXI_AWREADY && axi_awvalid) begin
+			axi_wdata <= frd_din;
+		end                                                     
 		else if (wnext) begin                                                                 
-			axi_wdata <= axi_wdata + 1;
+			axi_wdata <= frd_din;
 		end                                                   
 		else begin                                                                           
 			axi_wdata <= axi_wdata;
 		end                                                       
-	end                                                                             
+	end    
+
+	assign	frd_rdy = (!axi_wlast) && ((M_AXI_AWREADY && axi_awvalid) || wnext);                                                   
 
 
 	//----------------------------
@@ -707,13 +715,12 @@ module fifo2axi#(
 			write_burst_counter <= 'b0;                                                                         
 		end                                                                                                   
 		else if (M_AXI_AWREADY && axi_awvalid) begin                                                                                                 
-			if (write_burst_counter[C_NO_BURSTS_REQ] == 1'b0) begin                                                                                             
-				write_burst_counter <= write_burst_counter + 1'b1;                                              
-				//write_burst_counter[C_NO_BURSTS_REQ] <= 1'b1;                                                 
-			end                                                                                               
+			if (write_burst_counter <= (pixels_horizontal*8)/(FDW*C_M_AXI_BURST_LEN)) begin                                                         
+				write_burst_counter <= write_burst_counter + 1'b1;        
+			end                                  
 		end
-		else begin                                                                                                  
-			write_burst_counter <= write_burst_counter;         
+		else if(writes_done)begin                                                                                                  
+			write_burst_counter <= 0;         
 		end                                                  
 	end                                                                                                       
 	                                                                                                            
@@ -755,7 +762,8 @@ module fifo2axi#(
 				IDLE:                                                                                     
 				// This state is responsible to wait for user defined C_M_START_COUNT                           
 				// number of clock cycles.                                                                      
-				if ( init_txn_pulse == 1'b1) begin                                                                                         
+				//if ( init_txn_pulse == 1'b1) begin         
+				if(frd_cnt >= (pixels_horizontal*8)/FDW) begin                                                            
 					mst_exec_state  <= INIT_WRITE;                                                              
 					ERROR <= 1'b0;
 					compare_done <= 1'b0;
@@ -770,7 +778,7 @@ module fifo2axi#(
 				// issued until burst_write_active signal is asserted.                                          
 				// write controller                                                                             
 				if (writes_done) begin                                                                                         
-					mst_exec_state <= INIT_READ;//                                                              
+					mst_exec_state <= IDLE;                                                              
 				end                                                                                           
 				else begin                                                                                         
 					mst_exec_state  <= INIT_WRITE;                                                              
@@ -845,10 +853,10 @@ module fifo2axi#(
 																												
 		//The writes_done should be associated with a bready response                                           
 		//else if (M_AXI_BVALID && axi_bready && (write_burst_counter == {(C_NO_BURSTS_REQ-1){1}}) && axi_wlast)
-		else if (M_AXI_BVALID && (write_burst_counter[C_NO_BURSTS_REQ]) && axi_bready)                          
+		else if (M_AXI_BVALID && (write_burst_counter == (pixels_horizontal*8)/(FDW*C_M_AXI_BURST_LEN)) && axi_bready)                          
 			writes_done <= 1'b1;                                                                                  
 		else                                                                                                    
-			writes_done <= writes_done;                                                                           
+			writes_done <= 0;                                                                           
 	end                                                                                                     
 	                                                                                                            
 	// burst_read_active signal is asserted when there is a burst write transaction                           

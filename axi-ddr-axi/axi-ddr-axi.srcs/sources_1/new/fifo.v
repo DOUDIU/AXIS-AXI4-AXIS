@@ -150,6 +150,9 @@ module fifo #(
    // synopsys translate_on
    //---------------------------------------------------
    reg [FDW-1:0] Mem [0:FDT-1];
+   integer i; 
+   initial for (i=0; i<FDT; i=i+1) Mem[i] = 0; 
+
    assign rd_dout  = Mem[fifo_head[FAW-1:0]];
    always @(posedge clk) begin
        if (!full && wr_vld) begin

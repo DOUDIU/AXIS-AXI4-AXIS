@@ -23,15 +23,16 @@
 module axis2ddr_top#(
         //the max depth of the fifo: 2^FIFO_AW
         parameter FIFO_AW           = 8
-        //the base address of the DDR
-    ,   parameter ADDR_BASE         = 32'h10000000
 		// AXI4Stream sink: Data Width
     ,   parameter AXIS_DATA_WIDTH	= 32
 		// AXI4 sink: Data Width as same as the data depth of the fifo
     ,   parameter AXI4_DATA_WIDTH   = 128
+        // Horizontal resolution
+    ,   parameter pixels_horizontal = 1280
+
 
 		// Base address of targeted slave
-	,   parameter  C_M_TARGET_SLAVE_BASE_ADDR	= 32'h40000000
+	,   parameter  C_M_TARGET_SLAVE_BASE_ADDR	= 32'h10000000
 		// Burst Length. Supports 1, 2, 4, 8, 16, 32, 64, 128, 256 burst lengths
 	,   parameter integer C_M_AXI_BURST_LEN	= 16
 		// Thread ID Width
@@ -39,7 +40,7 @@ module axis2ddr_top#(
 		// Width of Address Bus
 	,   parameter integer C_M_AXI_ADDR_WIDTH	= 32
 		// Width of Data Bus
-	,   parameter integer C_M_AXI_DATA_WIDTH	= 32
+	,   parameter integer C_M_AXI_DATA_WIDTH	= AXI4_DATA_WIDTH
 		// Width of User Write Address Bus
 	,   parameter integer C_M_AXI_AWUSER_WIDTH	= 0
 		// Width of User Read Address Bus
@@ -67,6 +68,24 @@ module axis2ddr_top#(
     ,   input wire  S_AXIS_TLAST
     // Data is in valid
     ,   input wire  S_AXIS_TVALID
+
+
+//----------------------------------------------------
+// AXIS maxter port
+    // AXI4Stream sink: Clock
+    ,   input wire  M_AXIS_ACLK
+    // AXI4Stream sink: Reset
+    ,   input wire  M_AXIS_ARESETN
+    // Ready to accept data in
+    ,   output wire  M_AXIS_TREADY
+    // Data in
+    ,   input wire [AXIS_DATA_WIDTH-1 : 0] M_AXIS_TDATA
+    // Byte qualifier
+    ,   input wire [(AXIS_DATA_WIDTH/8)-1 : 0] M_AXIS_TSTRB
+    // Indicates boundary of last packet
+    ,   input wire  M_AXIS_TLAST
+    // Data is in valid
+    ,   input wire  M_AXIS_TVALID
 
 //----------------------------------------------------
 // AXI-FULL master port
@@ -245,11 +264,11 @@ axis2fifo #(
 
 
 //---------------------------------------------------
-// FIFO STORAGE
+// FORWARD FIFO STORAGE
 fifo #(
         .FDW                (AXI4_DATA_WIDTH    )
     ,   .FAW                (FIFO_AW            )
-)u_fifo(
+)u_forwardfifo(
         .rst                (~S_AXIS_ARESETN    )
     ,   .clr                (1'b0               )
     ,   .clk                (S_AXIS_ACLK        )
@@ -267,12 +286,50 @@ fifo #(
     ,   .wr_cnt             (fwr_cnt            )
 );
 
+//---------------------------------------------------
+// BACKWARD FIFO STORAGE
+fifo #(
+        .FDW                (AXI4_DATA_WIDTH    )
+    ,   .FAW                (FIFO_AW            )
+)u_backward_fifo(
+        .rst                (~S_AXIS_ARESETN    )
+    ,   .clr                (1'b0               )
+    ,   .clk                (S_AXIS_ACLK        )
+    ,   .wr_rdy             (fwr_rdy            )
+    ,   .wr_vld             (fwr_vld            )
+    ,   .wr_din             (fwr_dat            )
+    ,   .rd_rdy             (frd_rdy            )
+    ,   .rd_vld             (frd_vld            )
+    ,   .rd_dout            (frd_din            )
+    ,   .empty              (frd_empty          )
+    ,   .full               (fwr_full           )
+    ,   .fullN              ()
+    ,   .emptyN             ()
+    ,   .rd_cnt             (frd_cnt            )
+    ,   .wr_cnt             (fwr_cnt            )
+);
 
 //---------------------------------------------------
 // FIFO TO AXI FULL
 fifo2axi #(
-        .FDW                (AXI4_DATA_WIDTH    )
-    ,   .FAW                (FIFO_AW            )
+    //----------------------------------------------------
+    // FIFO parameters
+        .FDW                            (AXI4_DATA_WIDTH    )
+    ,   .FAW                            (FIFO_AW            )
+    ,   .pixels_horizontal              (pixels_horizontal  )
+
+    //----------------------------------------------------
+    // AXI-FULL parameters
+	,   .C_M_TARGET_SLAVE_BASE_ADDR	    (C_M_TARGET_SLAVE_BASE_ADDR)   
+	,   .C_M_AXI_BURST_LEN	            (C_M_AXI_BURST_LEN	       )   
+	,   .C_M_AXI_ID_WIDTH	            (C_M_AXI_ID_WIDTH	       )   
+	,   .C_M_AXI_ADDR_WIDTH	            (C_M_AXI_ADDR_WIDTH	       )   
+	,   .C_M_AXI_DATA_WIDTH	            (C_M_AXI_DATA_WIDTH	       )   
+	,   .C_M_AXI_AWUSER_WIDTH	        (C_M_AXI_AWUSER_WIDTH	   )   
+	,   .C_M_AXI_ARUSER_WIDTH	        (C_M_AXI_ARUSER_WIDTH	   )   
+	,   .C_M_AXI_WUSER_WIDTH	        (C_M_AXI_WUSER_WIDTH	   )   
+	,   .C_M_AXI_RUSER_WIDTH	        (C_M_AXI_RUSER_WIDTH	   )   
+	,   .C_M_AXI_BUSER_WIDTH	        (C_M_AXI_BUSER_WIDTH	   )   
 )u_fifo2axi(
 
 //----------------------------------------------------
