@@ -234,14 +234,25 @@ module axis2ddr_top#(
     wire                            frd_empty   ;
     wire [FIFO_AW:0]                frd_cnt     ;
 
+    wire                            bwr_rdy     ;
+    wire                            bwr_vld     ;
+    wire [AXI4_DATA_WIDTH-1:0]      bwr_dat     ;
+    wire                            bwr_full    ;
+    wire [FIFO_AW:0]                bwr_cnt     ;
+
+    wire                            brd_rdy     ;
+    wire                            brd_vld     ;
+    wire [AXI4_DATA_WIDTH-1:0]      brd_din     ;
+    wire                            brd_empty   ;
+    wire [FIFO_AW:0]                brd_cnt     ;
 
 //---------------------------------------------------
-// AXI STREAM to FIFO
+// AXI STREAM to FORWARD FIFO
 axis2fifo #(
         .FIFO_AW            (FIFO_AW            )
     ,   .AXIS_DATA_WIDTH    (AXIS_DATA_WIDTH    )
     ,   .AXI4_DATA_WIDTH    (AXI4_DATA_WIDTH    )
-)u_axis2fifo(
+)u_axis_salve2fifo(
 //----------------------------------------------------
 // AXIS slave port
         .S_AXIS_ACLK        (S_AXIS_ACLK        )
@@ -262,6 +273,32 @@ axis2fifo #(
     ,   .fwr_cnt            (fwr_cnt            )
 );
 
+//---------------------------------------------------
+// BACKWARD FIFO TO AXI STREAM 
+fifo2axis #(
+        .FIFO_AW            (FIFO_AW            )
+    ,   .AXIS_DATA_WIDTH	(AXIS_DATA_WIDTH    )
+    ,   .AXI4_DATA_WIDTH    (AXI4_DATA_WIDTH    )
+)u_fifo2axis_maxter(
+//----------------------------------------------------
+// AXIS maxter port
+	    .M_AXIS_ACLK        (M_AXIS_ACLK        )
+	,   .M_AXIS_ARESETN     (M_AXIS_ARESETN     )
+	,   .M_AXIS_TVALID      (M_AXIS_TVALID      )
+	,   .M_AXIS_TDATA       (M_AXIS_TDATA       )
+	,   .M_AXIS_TSTRB       (M_AXIS_TSTRB       )
+	,   .M_AXIS_TLAST       (M_AXIS_TLAST       )
+	,   .M_AXIS_TREADY      (M_AXIS_TREADY      )
+
+//----------------------------------------------------
+// backward FIFO read interface
+    ,   .brd_start          ()
+    ,   .brd_rdy            (brd_rdy            )
+    ,   .brd_vld            (brd_vld            )
+    ,   .brd_din            (brd_din            )
+    ,   .brd_empty          (brd_empty          )
+    ,   .brd_cnt            (brd_cnt            )
+);
 
 //---------------------------------------------------
 // FORWARD FIFO STORAGE
@@ -295,23 +332,23 @@ fifo #(
         .rst                (~S_AXIS_ARESETN    )
     ,   .clr                (1'b0               )
     ,   .clk                (S_AXIS_ACLK        )
-    ,   .wr_rdy             (fwr_rdy            )
-    ,   .wr_vld             (fwr_vld            )
-    ,   .wr_din             (fwr_dat            )
-    ,   .rd_rdy             (frd_rdy            )
-    ,   .rd_vld             (frd_vld            )
-    ,   .rd_dout            (frd_din            )
-    ,   .empty              (frd_empty          )
-    ,   .full               (fwr_full           )
+    ,   .wr_rdy             (bwr_rdy            )
+    ,   .wr_vld             (bwr_vld            )
+    ,   .wr_din             (bwr_dat            )
+    ,   .rd_rdy             (brd_rdy            )
+    ,   .rd_vld             (brd_vld            )
+    ,   .rd_dout            (brd_din            )
+    ,   .empty              (brd_empty          )
+    ,   .full               (bwr_full           )
     ,   .fullN              ()
     ,   .emptyN             ()
-    ,   .rd_cnt             (frd_cnt            )
-    ,   .wr_cnt             (fwr_cnt            )
+    ,   .rd_cnt             (brd_cnt            )
+    ,   .wr_cnt             (bwr_cnt            )
 );
 
 //---------------------------------------------------
 // FIFO TO AXI FULL
-fifo2axi #(
+axi_full_core #(
     //----------------------------------------------------
     // FIFO parameters
         .FDW                            (AXI4_DATA_WIDTH    )
@@ -330,16 +367,24 @@ fifo2axi #(
 	,   .C_M_AXI_WUSER_WIDTH	        (C_M_AXI_WUSER_WIDTH	   )   
 	,   .C_M_AXI_RUSER_WIDTH	        (C_M_AXI_RUSER_WIDTH	   )   
 	,   .C_M_AXI_BUSER_WIDTH	        (C_M_AXI_BUSER_WIDTH	   )   
-)u_fifo2axi(
+)u_axi_full_core(
 
 //----------------------------------------------------
-// FIFO read interface
+// forward FIFO read interface
         .frd_start          ()
     ,   .frd_rdy            (frd_rdy            )
     ,   .frd_vld            (frd_vld            )
     ,   .frd_din            (frd_din            )
     ,   .frd_empty          (frd_empty          )
     ,   .frd_cnt            (frd_cnt            )   
+
+//----------------------------------------------------
+// backward FIFO write interface
+    ,   .bwr_rdy            (bwr_rdy            )
+    ,   .bwr_vld            (bwr_vld            )
+    ,   .bwr_dat            (bwr_dat            )
+    ,   .bwr_full           (bwr_full           )
+    ,   .bwr_cnt            (bwr_cnt            )   
 
 //----------------------------------------------------
 // AXI-FULL master port

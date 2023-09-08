@@ -20,7 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module fifo2axi#(
+module axi_full_core#(
     	parameter FDW = 32
     ,	parameter FAW = 8
         // Horizontal resolution
@@ -180,13 +180,21 @@ module fifo2axi#(
     ,   output wire  M_AXI_RREADY
 
 //----------------------------------------------------
-// FIFO read interface
+// forward FIFO read interface
     ,   input   wire           	frd_start
     ,   output  wire           	frd_rdy  
     ,   input   wire           	frd_vld  
     ,   input   wire [FDW-1:0] 	frd_din  
     ,   input   wire           	frd_empty
     ,   input   wire [FAW:0] 	frd_cnt  
+
+//----------------------------------------------------
+// backward FIFO write interface
+    ,   input   wire           	bwr_rdy  
+    ,   output  reg           	bwr_vld  
+    ,   output  reg  [FDW-1:0] 	bwr_dat  
+    ,   input   wire           	bwr_full
+    ,   input   wire [FAW:0] 	bwr_cnt  
 );
 
 
