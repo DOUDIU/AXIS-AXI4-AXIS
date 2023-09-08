@@ -194,7 +194,7 @@ module axi_full_core#(
     ,   output  reg           	bwr_vld  
     ,   output  reg  [FDW-1:0] 	bwr_dat  
     ,   input   wire           	bwr_full
-    ,   input   wire [FAW:0] 	bwr_cnt  
+    ,   input   wire [FAW:0] 	brd_cnt  
 );
 
 
@@ -224,19 +224,20 @@ module axi_full_core#(
 	// Example State machine to initialize counter, initialize write transactions, 
 	// initialize read transactions and comparison of read data with the 
 	// written data words.
-	parameter [1:0] IDLE = 2'b00, // This state initiates AXI4Lite transaction 
+	parameter [3:0] IDLE_W = 4'b0000, // This state initiates AXI4Lite transaction 
 			// after the state machine changes state to INIT_WRITE 
 			// when there is 0 to 1 transition on INIT_AXI_TXN
-		INIT_WRITE   = 2'b01, // This state initializes write transaction,
+		INIT_WRITE   = 4'b0001, // This state initializes write transaction,
 			// once writes are done, the state machine 
 			// changes state to INIT_READ 
-		INIT_READ = 2'b10, // This state initializes read transaction
+		INIT_READ = 4'b0010, // This state initializes read transaction
 			// once reads are done, the state machine 
 			// changes state to INIT_COMPARE 
-		INIT_COMPARE = 2'b11; // This state issues the status of comparison 
+		INIT_COMPARE = 4'b0011, // This state issues the status of comparison 
 			// of the written data with the read data	
+		IDLE_RW = 4'b0100;
 
-	 reg [1:0] mst_exec_state;
+	 reg [3:0] mst_exec_state;
 
 	// AXI4LITE signals
 	//AXI4 internal temp signals
@@ -610,7 +611,22 @@ module axi_full_core#(
 	    else begin                                                               
 	      	read_index <= read_index;  
 		end                                       
-	end                                                                   
+	end
+                                
+	always @(posedge M_AXI_ACLK) begin                                                                 
+	    if (M_AXI_ARESETN == 0 || init_txn_pulse == 1'b1) begin
+	        bwr_vld	<=	0;
+			bwr_dat	<=	0;   	                                  
+		end
+		else if(rnext)begin
+	        bwr_vld	<=	1;
+			bwr_dat	<=	M_AXI_RDATA;   
+		end
+		else begin
+	        bwr_vld	<=	0;
+			bwr_dat	<=	0;   	
+		end
+	end
 
 
 	/*                                                                      
@@ -739,13 +755,12 @@ module axi_full_core#(
 			read_burst_counter <= 'b0;                                                                          
 		end                                                                                                   
 		else if (M_AXI_ARREADY && axi_arvalid) begin                                                                                                 
-			if (read_burst_counter[C_NO_BURSTS_REQ] == 1'b0) begin                                                                                             
-				read_burst_counter <= read_burst_counter + 1'b1;                                                
-				//read_burst_counter[C_NO_BURSTS_REQ] <= 1'b1;                                                  
+			if (read_burst_counter <= (pixels_horizontal*8)/(FDW*C_M_AXI_BURST_LEN)) begin
+				read_burst_counter <= read_burst_counter + 1'b1;
 			end                                                                                               
 		end                                                                                                   
-		else begin                                                                                                  
-			read_burst_counter <= read_burst_counter;     
+		else if(reads_done)begin                                                                                                  
+			read_burst_counter <= 0;     
 		end                                                        
 	end
 
@@ -756,7 +771,7 @@ module axi_full_core#(
 		if (M_AXI_ARESETN == 1'b0 ) begin                                                                                                 
 			// reset condition                                                                                  
 			// All the signals are assigned default values under reset condition                                
-			mst_exec_state      <= IDLE;                                                                
+			mst_exec_state      <= IDLE_W;                                                                
 			start_single_burst_write <= 1'b0;                                                                   
 			start_single_burst_read  <= 1'b0;                                                                   
 			compare_done      <= 1'b0;                                                                          
@@ -767,7 +782,7 @@ module axi_full_core#(
 			// state transition                                                                                 
 			case (mst_exec_state)                                                                               
 																												
-				IDLE:                                                                                     
+				IDLE_W:                                                                                     
 				// This state is responsible to wait for user defined C_M_START_COUNT                           
 				// number of clock cycles.                                                                      
 				//if ( init_txn_pulse == 1'b1) begin         
@@ -777,16 +792,31 @@ module axi_full_core#(
 					compare_done <= 1'b0;
 				end                                                                                           
 				else begin                                                                                         
-					mst_exec_state  <= IDLE;                                                            
-				end                                                                                           
-																												
+					mst_exec_state  <= IDLE_W;                                                            
+				end        
+
+				IDLE_RW:
+				if(frd_cnt >= (pixels_horizontal*8)/FDW) begin                                                            
+					mst_exec_state  <= INIT_WRITE;                                                              
+					ERROR <= 1'b0;
+					compare_done <= 1'b0;
+				end
+				else if (brd_cnt == 0) begin
+					mst_exec_state <= INIT_READ;                                                          
+					ERROR <= 1'b0;
+					compare_done <= 1'b0;
+				end
+				else begin                                                                                         
+					mst_exec_state  <= IDLE_RW;                                                            
+				end        
+
 				INIT_WRITE:                                                                                       
 				// This state is responsible to issue start_single_write pulse to                               
 				// initiate a write transaction. Write transactions will be                                     
 				// issued until burst_write_active signal is asserted.                                          
 				// write controller                                                                             
 				if (writes_done) begin                                                                                         
-					mst_exec_state <= IDLE;                                                              
+					mst_exec_state <= IDLE_RW;                                                              
 				end                                                                                           
 				else begin                                                                                         
 					mst_exec_state  <= INIT_WRITE;                                                              
@@ -798,14 +828,14 @@ module axi_full_core#(
 						start_single_burst_write <= 1'b0; //Negate to generate a pulse                          
 					end                                                                                       
 				end
-				
+
 				INIT_READ:                                                                                        
 				// This state is responsible to issue start_single_read pulse to                                
 				// initiate a read transaction. Read transactions will be                                       
 				// issued until burst_read_active signal is asserted.                                           
 				// read controller                                                                              
 				if (reads_done) begin                                                                                         
-					mst_exec_state <= INIT_COMPARE;                                                             
+					mst_exec_state <= IDLE_RW;                                                             
 				end                                                                                           
 				else begin                                                                                         
 					mst_exec_state  <= INIT_READ;                                                               
@@ -824,11 +854,11 @@ module axi_full_core#(
 				// compare_done signal will be asseted to indicate success.                                     
 				//if (~error_reg)                                                                             
 					ERROR <= error_reg;
-					mst_exec_state <= IDLE;                                                               
+					mst_exec_state <= IDLE_RW;                                                               
 					compare_done <= 1'b1;                                                                         
 				end                                                                                             
 				default : begin                                                                                           
-					mst_exec_state  <= IDLE;                                                              
+					mst_exec_state  <= IDLE_RW;                                                              
 				end                                                                                             
 			endcase                                                                                             
 		end                                                                                                   
@@ -894,10 +924,10 @@ module axi_full_core#(
 																												
 		//The reads_done should be associated with a rready response                                            
 		//else if (M_AXI_BVALID && axi_bready && (write_burst_counter == {(C_NO_BURSTS_REQ-1){1}}) && axi_wlast)
-		else if (M_AXI_RVALID && axi_rready && (read_index == C_M_AXI_BURST_LEN-1) && (read_burst_counter[C_NO_BURSTS_REQ]))
+		else if (M_AXI_RVALID && axi_rready && (read_index == C_M_AXI_BURST_LEN-1) && (read_burst_counter == (pixels_horizontal*8)/(FDW*C_M_AXI_BURST_LEN)))
 			reads_done <= 1'b1;                                                                                   
 		else                                                                                                    
-			reads_done <= reads_done;                                                                             
+			reads_done <= 0;                                                                             
 	end                                                                                                     
 
 	// Add user logic here

@@ -276,19 +276,31 @@ axis2fifo #(
 //---------------------------------------------------
 // BACKWARD FIFO TO AXI STREAM 
 fifo2axis #(
-        .FIFO_AW            (FIFO_AW            )
+        .FDW                (AXI4_DATA_WIDTH    )
+    ,   .FAW                (FIFO_AW            )
+    ,   .FIFO_AW            (FIFO_AW            )
     ,   .AXIS_DATA_WIDTH	(AXIS_DATA_WIDTH    )
     ,   .AXI4_DATA_WIDTH    (AXI4_DATA_WIDTH    )
 )u_fifo2axis_maxter(
 //----------------------------------------------------
 // AXIS maxter port
-	    .M_AXIS_ACLK        (M_AXIS_ACLK        )
-	,   .M_AXIS_ARESETN     (M_AXIS_ARESETN     )
+	    .M_AXIS_ACLK        (S_AXIS_ACLK        )
+	,   .M_AXIS_ARESETN     (S_AXIS_ARESETN     )
 	,   .M_AXIS_TVALID      (M_AXIS_TVALID      )
 	,   .M_AXIS_TDATA       (M_AXIS_TDATA       )
 	,   .M_AXIS_TSTRB       (M_AXIS_TSTRB       )
 	,   .M_AXIS_TLAST       (M_AXIS_TLAST       )
-	,   .M_AXIS_TREADY      (M_AXIS_TREADY      )
+	,   .M_AXIS_TREADY      (1)//M_AXIS_TREADY      )
+
+//----------------------------------------------------
+// AXIS slave port
+    ,   .S_AXIS_ACLK        (S_AXIS_ACLK        )
+    ,   .S_AXIS_ARESETN     (S_AXIS_ARESETN     )
+    ,   .S_AXIS_TREADY      (S_AXIS_TREADY      )
+    ,   .S_AXIS_TDATA       (S_AXIS_TDATA       )
+    ,   .S_AXIS_TSTRB       (S_AXIS_TSTRB       )
+    ,   .S_AXIS_TLAST       (S_AXIS_TLAST       )
+    ,   .S_AXIS_TVALID      (S_AXIS_TVALID      )
 
 //----------------------------------------------------
 // backward FIFO read interface
@@ -384,7 +396,7 @@ axi_full_core #(
     ,   .bwr_vld            (bwr_vld            )
     ,   .bwr_dat            (bwr_dat            )
     ,   .bwr_full           (bwr_full           )
-    ,   .bwr_cnt            (bwr_cnt            )   
+    ,   .brd_cnt            (brd_cnt            )   
 
 //----------------------------------------------------
 // AXI-FULL master port
