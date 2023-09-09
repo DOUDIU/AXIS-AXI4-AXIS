@@ -206,8 +206,8 @@
 	//ADDR_LSB = 2 for 32 bits (n downto 2) 
 	//ADDR_LSB = 3 for 42 bits (n downto 3)
 
-	localparam integer ADDR_LSB = (C_S_AXI_DATA_WIDTH/32)+ 1;
-	localparam integer OPT_MEM_ADDR_BITS = 3;
+	localparam integer ADDR_LSB = (C_S_AXI_DATA_WIDTH/32);
+	localparam integer OPT_MEM_ADDR_BITS = 24-ADDR_LSB;//the address number = 80Mb/8 = 10485760(24bits)
 	localparam integer USER_NUM_MEM = 1;
 	//----------------------------------------------
 	//-- Signals for user logic memory space example
@@ -567,8 +567,11 @@
 	      begin:BYTE_BRAM_GEN
 	        wire [8-1:0] data_in ;
 	        wire [8-1:0] data_out;
-	        reg  [8-1:0] byte_ram [0 : 15];
-	        integer  j;
+	        reg  [8-1:0] byte_ram [0 : 655359];
+	        //each frame is 10Mb = 1280 * 1024 * 8 bits
+			//128bits * 655360 = 80Mb = 10Mb * 8 frames
+
+			integer  j;
 	     
 	        //assigning 8 bit data
 	        assign data_in  = S_AXI_WDATA[(mem_byte_index*8+7) -: 8];

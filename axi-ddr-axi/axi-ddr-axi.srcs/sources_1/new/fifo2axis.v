@@ -154,18 +154,6 @@ end
 
 assign axis_tvalid = ((mst_exec_state == SEND_STREAM) && (read_pointer < NUMBER_OF_OUTPUT_WORDS));
 
-// always @(posedge M_AXIS_ACLK)begin
-//     if (!M_AXIS_ARESETN) begin 
-//         axis_tvalid <= 0;
-//     end
-//     else if(burst_en) begin 
-//         axis_tvalid <= 1;
-//     end
-//     else if(read_pointer == NUMBER_OF_OUTPUT_WORDS - 1) begin
-//         axis_tvalid <= 0;
-//     end
-// end
-
 // AXI tlast generation
 assign axis_tlast = (read_pointer == NUMBER_OF_OUTPUT_WORDS - 1'b1) && tx_en;
 assign tx_done = axis_tlast;

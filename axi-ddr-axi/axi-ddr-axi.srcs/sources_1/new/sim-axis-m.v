@@ -4,6 +4,10 @@ module maxis_v1_0_M00_AXIS #
 	parameter integer C_M_AXIS_TDATA_WIDTH = 32,
 	// Start count is the number of clock cycles the master will wait before initiating/issuing any transaction.
 	parameter integer C_M_START_COUNT = 3
+	
+    ,   parameter FRAME_DELAY = 2 //max 1024
+    ,   parameter PIXELS_HORIZONTAL = 1280
+    ,   parameter PIXELS_VERTICAL = 1024
 )(
 	// Global ports
 	input wire M_AXIS_ACLK,
@@ -59,7 +63,7 @@ wire tx_en;
 wire tx_done;
 // I/O Connections assignments 
 assign M_AXIS_TVALID 	= axis_tvalid;
-assign M_AXIS_TDATA 	= read_pointer;
+assign M_AXIS_TDATA 	= read_pointer+{frame_cnt,vertical_cnt,16'h0};
 assign M_AXIS_TLAST 	= axis_tlast;
 assign M_AXIS_TSTRB 	= {(C_M_AXIS_TDATA_WIDTH/8){1'b1}};
 // Control state machine implementation
@@ -118,4 +122,26 @@ always @( posedge M_AXIS_ACLK )begin
 		read_pointer <= 0;
 	end
 end
+
+reg     [3:0]   frame_cnt;
+reg     [11:0]  vertical_cnt;
+
+always@(posedge M_AXIS_ACLK) begin
+    if(!M_AXIS_ARESETN) begin
+        vertical_cnt   <=  0;
+    end
+    else if(M_AXIS_TLAST)begin
+        vertical_cnt   <=  (vertical_cnt >= PIXELS_VERTICAL - 1) ? 0 : (vertical_cnt + 1);
+    end
+end
+
+always@(posedge M_AXIS_ACLK) begin
+    if(!M_AXIS_ARESETN) begin
+        frame_cnt   <=  0;
+    end
+    else if(M_AXIS_TLAST & (vertical_cnt == PIXELS_VERTICAL - 1)) begin
+        frame_cnt   <=  frame_cnt + 1;
+    end
+end
+
 endmodule

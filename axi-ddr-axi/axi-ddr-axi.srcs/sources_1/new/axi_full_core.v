@@ -388,7 +388,7 @@ module axi_full_core#(
 			axi_awaddr <= 1'b0;                                             
 		end                                                              
 		else if (M_AXI_AWREADY && axi_awvalid) begin                                                            
-			axi_awaddr <= axi_awaddr + burst_size_bytes;                   
+			axi_awaddr <= (axi_awaddr >= 10485760-1) ? 0 : axi_awaddr + burst_size_bytes;                   
 		end                                                              
 		else begin                                                           
 			axi_awaddr <= axi_awaddr;
@@ -583,7 +583,7 @@ module axi_full_core#(
 	        axi_araddr <= 'b0;                                           
 		end                                                            
 	    else if (M_AXI_ARREADY && axi_arvalid) begin                                                          
-	    	axi_araddr <= axi_araddr + burst_size_bytes;                 
+	    	axi_araddr <= (axi_araddr >= 10485760-1) ? 0 : axi_araddr + burst_size_bytes;
 		end                                                            
 	    else begin                                                            
 	      	axi_araddr <= axi_araddr;       
