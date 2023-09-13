@@ -23,9 +23,11 @@
 module axi_full_core#(
     	parameter FDW = 32
     ,	parameter FAW = 8
-        // Horizontal resolution
-    ,   parameter pixels_horizontal = 1280
-	
+
+    ,   parameter FRAME_DELAY = 2 //max 1024
+    ,   parameter PIXELS_HORIZONTAL = 1280
+    ,   parameter PIXELS_VERTICAL = 1024
+
 		// Base address of targeted slave
 	,   parameter  C_M_TARGET_SLAVE_BASE_ADDR	= 32'h40000000
 		// Burst Length. Supports 1, 2, 4, 8, 16, 32, 64, 128, 256 burst lengths
@@ -181,7 +183,6 @@ module axi_full_core#(
 
 //----------------------------------------------------
 // forward FIFO read interface
-    ,   input   wire           	frd_start
     ,   output  wire           	frd_rdy  
     ,   input   wire           	frd_vld  
     ,   input   wire [FDW-1:0] 	frd_din  
@@ -388,7 +389,7 @@ module axi_full_core#(
 			axi_awaddr <= 1'b0;                                             
 		end                                                              
 		else if (M_AXI_AWREADY && axi_awvalid) begin                                                            
-			axi_awaddr <= (axi_awaddr >= 10485760-1) ? 0 : axi_awaddr + burst_size_bytes;                   
+			axi_awaddr <= (axi_awaddr >= (PIXELS_VERTICAL * PIXELS_HORIZONTAL * FRAME_DELAY) - 1) ? 0 : axi_awaddr + burst_size_bytes;                   
 		end                                                              
 		else begin                                                           
 			axi_awaddr <= axi_awaddr;
@@ -583,7 +584,7 @@ module axi_full_core#(
 	        axi_araddr <= 'b0;                                           
 		end                                                            
 	    else if (M_AXI_ARREADY && axi_arvalid) begin                                                          
-	    	axi_araddr <= (axi_araddr >= 10485760-1) ? 0 : axi_araddr + burst_size_bytes;
+	    	axi_araddr <= (axi_araddr >= (PIXELS_VERTICAL * PIXELS_HORIZONTAL * FRAME_DELAY) - 1) ? 0 : axi_araddr + burst_size_bytes;
 		end                                                            
 	    else begin                                                            
 	      	axi_araddr <= axi_araddr;       
@@ -739,7 +740,7 @@ module axi_full_core#(
 			write_burst_counter <= 'b0;                                                                         
 		end                                                                                                   
 		else if (M_AXI_AWREADY && axi_awvalid) begin                                                                                                 
-			if (write_burst_counter <= (pixels_horizontal*8)/(FDW*C_M_AXI_BURST_LEN)) begin                                                         
+			if (write_burst_counter <= (PIXELS_HORIZONTAL*8)/(FDW*C_M_AXI_BURST_LEN)) begin                                                         
 				write_burst_counter <= write_burst_counter + 1'b1;        
 			end                                  
 		end
@@ -755,7 +756,7 @@ module axi_full_core#(
 			read_burst_counter <= 'b0;                                                                          
 		end                                                                                                   
 		else if (M_AXI_ARREADY && axi_arvalid) begin                                                                                                 
-			if (read_burst_counter <= (pixels_horizontal*8)/(FDW*C_M_AXI_BURST_LEN)) begin
+			if (read_burst_counter <= (PIXELS_HORIZONTAL*8)/(FDW*C_M_AXI_BURST_LEN)) begin
 				read_burst_counter <= read_burst_counter + 1'b1;
 			end                                                                                               
 		end                                                                                                   
@@ -786,7 +787,7 @@ module axi_full_core#(
 				// This state is responsible to wait for user defined C_M_START_COUNT                           
 				// number of clock cycles.                                                                      
 				//if ( init_txn_pulse == 1'b1) begin         
-				if(frd_cnt >= (pixels_horizontal*8)/FDW) begin                                                            
+				if(frd_cnt >= (PIXELS_HORIZONTAL*8)/FDW) begin                                                            
 					mst_exec_state  <= INIT_WRITE;                                                              
 					ERROR <= 1'b0;
 					compare_done <= 1'b0;
@@ -796,7 +797,7 @@ module axi_full_core#(
 				end        
 
 				IDLE_RW:
-				if(frd_cnt >= (pixels_horizontal*8)/FDW) begin                                                            
+				if(frd_cnt >= (PIXELS_HORIZONTAL*8)/FDW) begin                                                            
 					mst_exec_state  <= INIT_WRITE;                                                              
 					ERROR <= 1'b0;
 					compare_done <= 1'b0;
@@ -891,7 +892,7 @@ module axi_full_core#(
 																												
 		//The writes_done should be associated with a bready response                                           
 		//else if (M_AXI_BVALID && axi_bready && (write_burst_counter == {(C_NO_BURSTS_REQ-1){1}}) && axi_wlast)
-		else if (M_AXI_BVALID && (write_burst_counter == (pixels_horizontal*8)/(FDW*C_M_AXI_BURST_LEN)) && axi_bready)                          
+		else if (M_AXI_BVALID && (write_burst_counter == (PIXELS_HORIZONTAL*8)/(FDW*C_M_AXI_BURST_LEN)) && axi_bready)                          
 			writes_done <= 1'b1;                                                                                  
 		else                                                                                                    
 			writes_done <= 0;                                                                           
@@ -924,7 +925,7 @@ module axi_full_core#(
 																												
 		//The reads_done should be associated with a rready response                                            
 		//else if (M_AXI_BVALID && axi_bready && (write_burst_counter == {(C_NO_BURSTS_REQ-1){1}}) && axi_wlast)
-		else if (M_AXI_RVALID && axi_rready && (read_index == C_M_AXI_BURST_LEN-1) && (read_burst_counter == (pixels_horizontal*8)/(FDW*C_M_AXI_BURST_LEN)))
+		else if (M_AXI_RVALID && axi_rready && (read_index == C_M_AXI_BURST_LEN-1) && (read_burst_counter == (PIXELS_HORIZONTAL*8)/(FDW*C_M_AXI_BURST_LEN)))
 			reads_done <= 1'b1;                                                                                   
 		else                                                                                                    
 			reads_done <= 0;                                                                             

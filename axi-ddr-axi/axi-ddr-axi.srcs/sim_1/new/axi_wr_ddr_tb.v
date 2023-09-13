@@ -97,19 +97,19 @@ maxis_v1_0_M00_AXIS#
 	,   .C_M_START_COUNT (300)
 )u_maxis_v1_0_M00_AXIS(
 	// Global ports
-	    .M_AXIS_ACLK    (AXIS_ACLK      )
+	    .M_AXIS_ACLK    		(AXIS_ACLK      )
 	//
-	,  	.M_AXIS_ARESETN  (AXIS_ARESETN   )
+	,  	.M_AXIS_ARESETN  		(AXIS_ARESETN   )
 	// Master Stream Ports. TVALID indicates that the master is driving a valid transfer, A transfer takes place when both TVALID and TREADY are asserted.
-	,  	.M_AXIS_TVALID   (AXIS_TVALID    )
+	,  	.M_AXIS_TVALID   		(AXIS_TVALID    )
 	// TDATA is the primary payload that is used to provide the data that is passing across the interface from the master.
-	,  	.M_AXIS_TDATA    (AXIS_TDATA     )
+	,  	.M_AXIS_TDATA    		(AXIS_TDATA     )
 	// TSTRB is the byte qualifier that indicates whether the content of the associated byte of TDATA is processed as a data byte or a position byte.
-	,  	.M_AXIS_TSTRB    (AXIS_TSTRB     )
+	,  	.M_AXIS_TSTRB    		(AXIS_TSTRB     )
 	// TLAST indicates the boundary of a packet.
-	,  	.M_AXIS_TLAST    (AXIS_TLAST     )
+	,  	.M_AXIS_TLAST    		(AXIS_TLAST     )
 	// TREADY indicates that the slave can accept a transfer in the current cycle.
-	,  	.M_AXIS_TREADY   (AXIS_TREADY    )
+	,  	.M_AXIS_TREADY   		(AXIS_TREADY    )
 );
 
 
@@ -146,10 +146,17 @@ axis2ddr_top #(
     ,   .S_AXIS_TVALID          (AXIS_TVALID    )
 
 //----------------------------------------------------
+// AXIS master port
+    ,   .M_AXIS_ACLK            (AXIS_ACLK      )
+    ,   .M_AXIS_ARESETN         (AXIS_ARESETN   )
+    ,   .M_AXIS_TREADY          (1)
+    ,   .M_AXIS_TDATA           ()
+    ,   .M_AXIS_TSTRB           ()
+    ,   .M_AXIS_TLAST           ()
+    ,   .M_AXIS_TVALID          ()
+
+//----------------------------------------------------
 // AXI-FULL master port
-    ,   .INIT_AXI_TXN           (INIT_AXI_TXN   )
-    ,   .TXN_DONE               (TXN_DONE       )
-    ,   .ERROR                  (ERROR          )
     ,   .M_AXI_ACLK             (M_AXI_ACLK     )
     ,   .M_AXI_ARESETN          (M_AXI_ARESETN  )
 
@@ -206,7 +213,7 @@ axis2ddr_top #(
     ,   .M_AXI_RREADY           (M_AXI_RREADY   )
 );
 
-// Instantiation of Axi Bus Interface S00_AXI
+//Virtual AXI-FULL MEMORY 
 	saxi_full_v1_0_S00_AXI # ( 
 		.C_S_AXI_ID_WIDTH       (AXI_ID_WIDTH     ),
 		.C_S_AXI_DATA_WIDTH     (AXI_DATA_WIDTH   ),
@@ -270,7 +277,7 @@ axis2ddr_top #(
 		,   .S_AXI_RREADY       (M_AXI_RREADY   )
 	);
 
-// saxis_v1_0_S00_AXIS#(
+// VIRTUAL AXI-STREAM MEMORY
 //     // Users to add parameters here
 
 //     // User parameters ends

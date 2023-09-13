@@ -22,14 +22,17 @@
 
 module axis2ddr_top#(
         //the max depth of the fifo: 2^FIFO_AW
-        parameter FIFO_AW           = 8
+        parameter FIFO_AW = 8
 		// AXI4Stream sink: Data Width
-    ,   parameter AXIS_DATA_WIDTH	= 32
+    ,   parameter AXIS_DATA_WIDTH = 32
 		// AXI4 sink: Data Width as same as the data depth of the fifo
-    ,   parameter AXI4_DATA_WIDTH   = 128
+    ,   parameter AXI4_DATA_WIDTH = 128
         // Horizontal resolution
     ,   parameter pixels_horizontal = 1280
-
+        // Vertical resolution
+    ,   parameter pixels_vertical = 1024
+        // Delay number of the frame, the max value is 1024(constrained by the bits of the counter)
+    ,   parameter frame_delay = 3
 
 		// Base address of targeted slave
 	,   parameter  C_M_TARGET_SLAVE_BASE_ADDR	= 32'h00000000
@@ -58,6 +61,7 @@ module axis2ddr_top#(
         input wire  S_AXIS_ACLK
     // AXI4Stream sink: Reset
     ,   input wire  S_AXIS_ARESETN
+
     // Ready to accept data in
     ,   output wire  S_AXIS_TREADY
     // Data in
@@ -76,25 +80,21 @@ module axis2ddr_top#(
     ,   input wire  M_AXIS_ACLK
     // AXI4Stream sink: Reset
     ,   input wire  M_AXIS_ARESETN
-    // Ready to accept data in
-    ,   output wire  M_AXIS_TREADY
-    // Data in
-    ,   input wire [AXIS_DATA_WIDTH-1 : 0] M_AXIS_TDATA
-    // Byte qualifier
-    ,   input wire [(AXIS_DATA_WIDTH/8)-1 : 0] M_AXIS_TSTRB
-    // Indicates boundary of last packet
-    ,   input wire  M_AXIS_TLAST
-    // Data is in valid
-    ,   input wire  M_AXIS_TVALID
+
+	// TREADY indicates that the slave can accept a transfer in the current cycle.
+    ,   input wire  M_AXIS_TREADY
+	// TDATA is the primary payload that is used to provide the data that is passing across the interface from the master.
+    ,   output wire [AXIS_DATA_WIDTH-1 : 0] M_AXIS_TDATA
+	// TSTRB is the byte qualifier that indicates whether the content of the associated byte of TDATA is processed as a data byte or a position byte.
+    ,   output wire [(AXIS_DATA_WIDTH/8)-1 : 0] M_AXIS_TSTRB
+	// TLAST indicates the boundary of a packet.
+    ,   output wire  M_AXIS_TLAST
+	// Master Stream Ports. TVALID indicates that the master is driving a valid transfer, A transfer takes place when both TVALID and TREADY are asserted.
+    ,   output wire  M_AXIS_TVALID
+
 
 //----------------------------------------------------
 // AXI-FULL master port
-    // Initiate AXI transactions
-    ,   input wire  INIT_AXI_TXN
-    // Asserts when transaction is complete
-    ,   output wire  TXN_DONE
-    // Asserts when ERROR is detected
-    ,   output reg  ERROR
     // Global Clock Signal.
     ,   input wire  M_AXI_ACLK
     // Global Reset Singal. This Signal is Active Low
@@ -249,7 +249,7 @@ module axis2ddr_top#(
 //---------------------------------------------------
 // AXI STREAM to FORWARD FIFO
 axis2fifo #(
-        .FIFO_AW            (FIFO_AW            )
+        .FAW                (FIFO_AW            )
     ,   .AXIS_DATA_WIDTH    (AXIS_DATA_WIDTH    )
     ,   .AXI4_DATA_WIDTH    (AXI4_DATA_WIDTH    )
 )u_axis_salve2fifo(
@@ -276,21 +276,24 @@ axis2fifo #(
 //---------------------------------------------------
 // BACKWARD FIFO TO AXI STREAM 
 fifo2axis #(
-        .FDW                (AXI4_DATA_WIDTH    )
+        .FRAME_DELAY        (frame_delay        )
+    ,   .PIXELS_HORIZONTAL  (pixels_horizontal  )
+    ,   .PIXELS_VERTICAL    (pixels_vertical    )
+
+    ,   .FDW                (AXI4_DATA_WIDTH    )
     ,   .FAW                (FIFO_AW            )
-    ,   .FIFO_AW            (FIFO_AW            )
     ,   .AXIS_DATA_WIDTH	(AXIS_DATA_WIDTH    )
     ,   .AXI4_DATA_WIDTH    (AXI4_DATA_WIDTH    )
 )u_fifo2axis_maxter(
 //----------------------------------------------------
 // AXIS maxter port
-	    .M_AXIS_ACLK        (S_AXIS_ACLK        )
-	,   .M_AXIS_ARESETN     (S_AXIS_ARESETN     )
+	    .M_AXIS_ACLK        (M_AXIS_ACLK        )
+	,   .M_AXIS_ARESETN     (M_AXIS_ARESETN     )
 	,   .M_AXIS_TVALID      (M_AXIS_TVALID      )
 	,   .M_AXIS_TDATA       (M_AXIS_TDATA       )
 	,   .M_AXIS_TSTRB       (M_AXIS_TSTRB       )
 	,   .M_AXIS_TLAST       (M_AXIS_TLAST       )
-	,   .M_AXIS_TREADY      (1)//M_AXIS_TREADY      )
+	,   .M_AXIS_TREADY      (M_AXIS_TREADY      )
 
 //----------------------------------------------------
 // AXIS slave port
@@ -304,7 +307,6 @@ fifo2axis #(
 
 //----------------------------------------------------
 // backward FIFO read interface
-    ,   .brd_start          ()
     ,   .brd_rdy            (brd_rdy            )
     ,   .brd_vld            (brd_vld            )
     ,   .brd_din            (brd_din            )
@@ -365,7 +367,9 @@ axi_full_core #(
     // FIFO parameters
         .FDW                            (AXI4_DATA_WIDTH    )
     ,   .FAW                            (FIFO_AW            )
-    ,   .pixels_horizontal              (pixels_horizontal  )
+    ,   .FRAME_DELAY                    (frame_delay        )
+    ,   .PIXELS_HORIZONTAL              (pixels_horizontal  )
+    ,   .PIXELS_VERTICAL                (pixels_vertical    )
 
     //----------------------------------------------------
     // AXI-FULL parameters
@@ -383,8 +387,7 @@ axi_full_core #(
 
 //----------------------------------------------------
 // forward FIFO read interface
-        .frd_start          ()
-    ,   .frd_rdy            (frd_rdy            )
+        .frd_rdy            (frd_rdy            )
     ,   .frd_vld            (frd_vld            )
     ,   .frd_din            (frd_din            )
     ,   .frd_empty          (frd_empty          )

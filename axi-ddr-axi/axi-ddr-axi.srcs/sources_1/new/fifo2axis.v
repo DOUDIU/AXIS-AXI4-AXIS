@@ -27,8 +27,7 @@ module fifo2axis#(
     ,   parameter FRAME_DELAY = 2 //max 1024
     ,   parameter PIXELS_HORIZONTAL = 1280
     ,   parameter PIXELS_VERTICAL = 1024
-        //the max depth of the fifo: 2^FIFO_AW
-    ,   parameter FIFO_AW           = 8
+	
 		// AXI4Stream sink: Data Width
     ,   parameter AXIS_DATA_WIDTH	= 32
 		// AXI4 sink: Data Width as same as the data depth of the fifo
@@ -72,7 +71,6 @@ module fifo2axis#(
 
 //----------------------------------------------------
 // backward FIFO read interface
-    ,   input   wire           	brd_start
     ,   output  wire           	brd_rdy  
     ,   input   wire           	brd_vld  
     ,   input   wire [FDW-1:0] 	brd_din  

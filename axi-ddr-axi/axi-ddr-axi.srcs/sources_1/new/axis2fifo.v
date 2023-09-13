@@ -22,7 +22,7 @@
 
 module axis2fifo#(
         //the max depth of the fifo: 2^FIFO_AW
-        parameter FIFO_AW           = 8
+        parameter FAW           = 8
 		// AXI4Stream sink: Data Width
     ,   parameter AXIS_DATA_WIDTH	= 32
 		// AXI4 sink: Data Width as same as the data depth of the fifo
@@ -51,7 +51,7 @@ module axis2fifo#(
     ,   output  reg fwr_vld  
     ,   output  reg  [AXI4_DATA_WIDTH-1:0]     fwr_dat  
     ,   input   wire fwr_full
-    ,   input   wire [FIFO_AW:0] fwr_cnt 
+    ,   input   wire [FAW:0] fwr_cnt 
 );
 localparam data_interval = AXI4_DATA_WIDTH/AXIS_DATA_WIDTH;
 
