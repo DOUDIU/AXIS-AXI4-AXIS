@@ -44,16 +44,17 @@ parameter [1:0] IDLE 			= 2'b00, 	// This is the initial/idle state
 				INIT_COUNTER 	= 2'b01, 	// This state initializes the counter, once 
 											// the counter reaches C_M_START_COUNT count,
 											// the state machine changes state to SEND_STREAM
-				SEND_STREAM 	= 2'b10; 	// In this state the 
+				SEND_STREAM 	= 2'b10, 	// In this state the 
 											// stream data is output through M_AXIS_TDATA
 											// State variable
+				FRAME_INTERVAL = 2'b11;
 
 reg [1:0] mst_exec_state;
 // Example design FIFO read pointer
 reg [bit_num-1:0] read_pointer;
 // AXI Stream internal signals 
 //wait counter. The master waits for the user defined number of clock cycles before initiating a transfer.
-reg [WAIT_COUNT_BITS-1 : 0] count;
+reg [10 : 0] count;
 //streaming data valid 
 wire axis_tvalid;
 //Last of the streaming data 
@@ -77,7 +78,10 @@ always @(posedge M_AXIS_ACLK)begin
 	else begin
 		case (mst_exec_state)
 			IDLE: 
-				mst_exec_state <= INIT_COUNTER;
+				if (vertical_cnt == PIXELS_VERTICAL - 1)
+					mst_exec_state <= INIT_COUNTER;
+				else 
+					mst_exec_state <= INIT_COUNTER;
 			INIT_COUNTER:
 				// The slave starts accepting tdata when 
 				// there tvalid is asserted to mark the 
@@ -97,6 +101,18 @@ always @(posedge M_AXIS_ACLK)begin
 				end
 				else begin 
 					mst_exec_state <= SEND_STREAM;
+				end
+			FRAME_INTERVAL:
+				// The slave starts accepting tdata when 
+				// there tvalid is asserted to mark the 
+				// presence of valid streaming data
+				if ( count == 300 - 1 )	begin 
+					mst_exec_state <= SEND_STREAM;
+					count <= 0;
+				end
+				else begin
+					count <= count + 1; 
+					mst_exec_state <= FRAME_INTERVAL;
 				end
 		endcase
 	end
