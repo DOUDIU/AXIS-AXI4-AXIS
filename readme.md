@@ -10,7 +10,7 @@ The framework of this project is displayed below:
 
 The storage memory is the DDR located on the PS side, and the interface is also convenient to change to the DDR located on the PL side.
 
-When the video data flows into the system in **AXI-STREAM** format. The data will flow into the forward **FIFO through** the **AXIS-To-FIFO** module, and it will flow out from the backward FIFO through the **FIFO-To-AXIS **module. The read-write operation of the forward FIFO and the backward FIFO is controlled by the **AXI4-FIFO-CORE** module. The operation is described as follows:
+When the video data flows into the system in **AXI-STREAM** format. The data will flow into the forward **FIFO through** the **AXIS-To-FIFO** module, and it will flow out from the backward FIFO through the **FIFO-To-AXIS ** module. The read-write operation of the forward FIFO and the backward FIFO is controlled by the **AXI4-FIFO-CORE** module. The operation is described as follows:
 
 > After the forward FIFO is filled with over 1280 data (representing the vertical pixels of one frame), the AXI4-FIFO-CORE switches to the SEND_DATA stage. It then sends the 1280 data with burst mode to DDR through the HP interface.
 >
