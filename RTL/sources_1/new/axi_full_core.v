@@ -389,7 +389,7 @@ module axi_full_core#(
 			axi_awaddr <= 1'b0;                                             
 		end                                                              
 		else if (M_AXI_AWREADY && axi_awvalid) begin                                                            
-			axi_awaddr <= (axi_awaddr >= (PIXELS_VERTICAL * PIXELS_HORIZONTAL * FRAME_DELAY) - 1) ? 0 : axi_awaddr + burst_size_bytes;                   
+			axi_awaddr <= (axi_awaddr >= (PIXELS_VERTICAL * PIXELS_HORIZONTAL * FRAME_DELAY - C_M_AXI_BURST_LEN * (C_M_AXI_DATA_WIDTH / 8)) - 1) ? 0 : (axi_awaddr + burst_size_bytes);                   
 		end                                                              
 		else begin                                                           
 			axi_awaddr <= axi_awaddr;
@@ -584,7 +584,7 @@ module axi_full_core#(
 	        axi_araddr <= 'b0;                                           
 		end                                                            
 	    else if (M_AXI_ARREADY && axi_arvalid) begin                                                          
-	    	axi_araddr <= (axi_araddr >= (PIXELS_VERTICAL * PIXELS_HORIZONTAL * FRAME_DELAY) - 1) ? 0 : axi_araddr + burst_size_bytes;
+	    	axi_araddr <= (axi_araddr >= (PIXELS_VERTICAL * PIXELS_HORIZONTAL * FRAME_DELAY - C_M_AXI_BURST_LEN * (C_M_AXI_DATA_WIDTH / 8)) - 1) ? 0 : axi_araddr + burst_size_bytes;
 		end                                                            
 	    else begin                                                            
 	      	axi_araddr <= axi_araddr;       
@@ -748,7 +748,7 @@ module axi_full_core#(
 			write_burst_counter <= 0;         
 		end                                                  
 	end                                                                                                       
-	                                                                                                            
+
 	// read_burst_counter counter keeps track with the number of burst transaction initiated                   
 	// against the number of burst transactions the master needs to initiate                                   
 	always @(posedge M_AXI_ACLK) begin                                                                                                     
@@ -802,7 +802,8 @@ module axi_full_core#(
 					ERROR <= 1'b0;
 					compare_done <= 1'b0;
 				end
-				else if (brd_cnt == 0) begin
+				// else if (brd_cnt == 0) begin
+				else if (brd_cnt <= (PIXELS_HORIZONTAL*8)/FDW - 1) begin
 					mst_exec_state <= INIT_READ;                                                          
 					ERROR <= 1'b0;
 					compare_done <= 1'b0;

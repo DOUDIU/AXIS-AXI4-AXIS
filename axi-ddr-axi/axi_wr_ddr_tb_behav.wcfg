@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="0.000000000 ms"></ZoomStartTime>
-      <ZoomEndTime time="38.600000001 ms"></ZoomEndTime>
-      <Cursor1Time time="3.599995000 ms"></Cursor1Time>
+      <ZoomStartTime time="2,881.495000 us"></ZoomStartTime>
+      <ZoomEndTime time="12,561.495001 us"></ZoomEndTime>
+      <Cursor1Time time="9,996.495000 us"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="300"></NameColumnWidth>
-      <ValueColumnWidth column_width="298"></ValueColumnWidth>
+      <ValueColumnWidth column_width="292"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="62" />
+   <WVObjectSize size="64" />
    <wvobject type="divider" fp_name="divider42">
       <obj_property name="label">AXIS-SLAVE</obj_property>
       <obj_property name="DisplayName">label</obj_property>
@@ -47,7 +47,7 @@
    <wvobject fp_name="/axi_wr_ddr_tb/AXIS_TDATA" type="array">
       <obj_property name="ElementShortName">AXIS_TDATA[31:0]</obj_property>
       <obj_property name="ObjectShortName">AXIS_TDATA[31:0]</obj_property>
-      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
    </wvobject>
    <wvobject fp_name="/axi_wr_ddr_tb/AXIS_TSTRB" type="array">
       <obj_property name="ElementShortName">AXIS_TSTRB[3:0]</obj_property>
@@ -68,7 +68,11 @@
    <wvobject fp_name="/axi_wr_ddr_tb/u_maxis_v1_0_M00_AXIS/count" type="array">
       <obj_property name="ElementShortName">count[10:0]</obj_property>
       <obj_property name="ObjectShortName">count[10:0]</obj_property>
-      <obj_property name="isExpanded"></obj_property>
+   </wvobject>
+   <wvobject fp_name="/axi_wr_ddr_tb/u_maxis_v1_0_M00_AXIS/vertical_cnt" type="array">
+      <obj_property name="ElementShortName">vertical_cnt[11:0]</obj_property>
+      <obj_property name="ObjectShortName">vertical_cnt[11:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
    <wvobject type="divider" fp_name="divider331">
       <obj_property name="label">AXI_FULL</obj_property>
@@ -88,6 +92,10 @@
       <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_axi_full_core/M_AXI_AWID" type="array">
          <obj_property name="ElementShortName">M_AXI_AWID[0:0]</obj_property>
          <obj_property name="ObjectShortName">M_AXI_AWID[0:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_axi_full_core/M_AXI_AWVALID" type="logic">
+         <obj_property name="ElementShortName">M_AXI_AWVALID</obj_property>
+         <obj_property name="ObjectShortName">M_AXI_AWVALID</obj_property>
       </wvobject>
       <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_axi_full_core/M_AXI_AWADDR" type="array">
          <obj_property name="ElementShortName">M_AXI_AWADDR[31:0]</obj_property>
@@ -124,10 +132,6 @@
       <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_axi_full_core/M_AXI_AWUSER" type="array">
          <obj_property name="ElementShortName">M_AXI_AWUSER[-1:0]</obj_property>
          <obj_property name="ObjectShortName">M_AXI_AWUSER[-1:0]</obj_property>
-      </wvobject>
-      <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_axi_full_core/M_AXI_AWVALID" type="logic">
-         <obj_property name="ElementShortName">M_AXI_AWVALID</obj_property>
-         <obj_property name="ObjectShortName">M_AXI_AWVALID</obj_property>
       </wvobject>
       <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_axi_full_core/M_AXI_AWREADY" type="logic">
          <obj_property name="ElementShortName">M_AXI_AWREADY</obj_property>
@@ -278,8 +282,8 @@
          <obj_property name="ObjectShortName">frd_empty</obj_property>
       </wvobject>
       <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_axi_full_core/frd_cnt" type="array">
-         <obj_property name="ElementShortName">frd_cnt[8:0]</obj_property>
-         <obj_property name="ObjectShortName">frd_cnt[8:0]</obj_property>
+         <obj_property name="ElementShortName">frd_cnt[10:0]</obj_property>
+         <obj_property name="ObjectShortName">frd_cnt[10:0]</obj_property>
       </wvobject>
       <wvobject type="divider" fp_name="divider235">
          <obj_property name="label">fifo_write</obj_property>
@@ -302,8 +306,8 @@
          <obj_property name="ObjectShortName">bwr_full</obj_property>
       </wvobject>
       <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_axi_full_core/brd_cnt" type="array">
-         <obj_property name="ElementShortName">brd_cnt[8:0]</obj_property>
-         <obj_property name="ObjectShortName">brd_cnt[8:0]</obj_property>
+         <obj_property name="ElementShortName">brd_cnt[10:0]</obj_property>
+         <obj_property name="ObjectShortName">brd_cnt[10:0]</obj_property>
       </wvobject>
       <wvobject type="divider" fp_name="divider301">
          <obj_property name="label">auxiliary-signals</obj_property>
@@ -367,7 +371,6 @@
       <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_fifo2axis_maxter/read_pointer" type="array">
          <obj_property name="ElementShortName">read_pointer[8:0]</obj_property>
          <obj_property name="ObjectShortName">read_pointer[8:0]</obj_property>
-         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
       </wvobject>
       <wvobject fp_name="vbus513" type="vbus">
          <obj_property name="label">read_pointer[1:0]</obj_property>
@@ -435,8 +438,8 @@
       <obj_property name="ObjectShortName">brd_empty</obj_property>
    </wvobject>
    <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_fifo2axis_maxter/brd_cnt" type="array">
-      <obj_property name="ElementShortName">brd_cnt[8:0]</obj_property>
-      <obj_property name="ObjectShortName">brd_cnt[8:0]</obj_property>
+      <obj_property name="ElementShortName">brd_cnt[10:0]</obj_property>
+      <obj_property name="ObjectShortName">brd_cnt[10:0]</obj_property>
       <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
    <wvobject type="divider" fp_name="divider514">
@@ -464,6 +467,18 @@
    <wvobject type="divider" fp_name="divider107">
       <obj_property name="label">BACKWARD-FIFO</obj_property>
       <obj_property name="DisplayName">label</obj_property>
+   </wvobject>
+   <wvobject fp_name="vbus211" type="vbus">
+      <obj_property name="label">read_pointer[1:0]</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_fifo2axis_maxter/read_pointer[1]" type="logic">
+         <obj_property name="ElementShortName">[1]</obj_property>
+         <obj_property name="ObjectShortName">[1]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_fifo2axis_maxter/read_pointer[0]" type="logic">
+         <obj_property name="ElementShortName">[0]</obj_property>
+         <obj_property name="ObjectShortName">[0]</obj_property>
+      </wvobject>
    </wvobject>
    <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_backward_fifo/rst" type="logic">
       <obj_property name="ElementShortName">rst</obj_property>
@@ -494,6 +509,8 @@
    <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_backward_fifo/rd_rdy" type="logic">
       <obj_property name="ElementShortName">rd_rdy</obj_property>
       <obj_property name="ObjectShortName">rd_rdy</obj_property>
+      <obj_property name="CustomSignalColor">#E0FFFF</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
    <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_backward_fifo/rd_vld" type="logic">
       <obj_property name="ElementShortName">rd_vld</obj_property>
@@ -520,36 +537,36 @@
       <obj_property name="ObjectShortName">emptyN</obj_property>
    </wvobject>
    <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_backward_fifo/rd_cnt" type="array">
-      <obj_property name="ElementShortName">rd_cnt[8:0]</obj_property>
-      <obj_property name="ObjectShortName">rd_cnt[8:0]</obj_property>
+      <obj_property name="ElementShortName">rd_cnt[10:0]</obj_property>
+      <obj_property name="ObjectShortName">rd_cnt[10:0]</obj_property>
    </wvobject>
    <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_backward_fifo/wr_cnt" type="array">
-      <obj_property name="ElementShortName">wr_cnt[8:0]</obj_property>
-      <obj_property name="ObjectShortName">wr_cnt[8:0]</obj_property>
+      <obj_property name="ElementShortName">wr_cnt[10:0]</obj_property>
+      <obj_property name="ObjectShortName">wr_cnt[10:0]</obj_property>
    </wvobject>
    <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_backward_fifo/fifo_head" type="array">
-      <obj_property name="ElementShortName">fifo_head[8:0]</obj_property>
-      <obj_property name="ObjectShortName">fifo_head[8:0]</obj_property>
+      <obj_property name="ElementShortName">fifo_head[10:0]</obj_property>
+      <obj_property name="ObjectShortName">fifo_head[10:0]</obj_property>
    </wvobject>
    <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_backward_fifo/fifo_tail" type="array">
-      <obj_property name="ElementShortName">fifo_tail[8:0]</obj_property>
-      <obj_property name="ObjectShortName">fifo_tail[8:0]</obj_property>
+      <obj_property name="ElementShortName">fifo_tail[10:0]</obj_property>
+      <obj_property name="ObjectShortName">fifo_tail[10:0]</obj_property>
    </wvobject>
    <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_backward_fifo/next_tail" type="array">
-      <obj_property name="ElementShortName">next_tail[8:0]</obj_property>
-      <obj_property name="ObjectShortName">next_tail[8:0]</obj_property>
+      <obj_property name="ElementShortName">next_tail[10:0]</obj_property>
+      <obj_property name="ObjectShortName">next_tail[10:0]</obj_property>
    </wvobject>
    <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_backward_fifo/next_head" type="array">
-      <obj_property name="ElementShortName">next_head[8:0]</obj_property>
-      <obj_property name="ObjectShortName">next_head[8:0]</obj_property>
+      <obj_property name="ElementShortName">next_head[10:0]</obj_property>
+      <obj_property name="ObjectShortName">next_head[10:0]</obj_property>
    </wvobject>
    <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_backward_fifo/read_addr" type="array">
-      <obj_property name="ElementShortName">read_addr[7:0]</obj_property>
-      <obj_property name="ObjectShortName">read_addr[7:0]</obj_property>
+      <obj_property name="ElementShortName">read_addr[9:0]</obj_property>
+      <obj_property name="ObjectShortName">read_addr[9:0]</obj_property>
    </wvobject>
    <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_backward_fifo/Mem" type="array">
-      <obj_property name="ElementShortName">Mem[0:255][127:0]</obj_property>
-      <obj_property name="ObjectShortName">Mem[0:255][127:0]</obj_property>
+      <obj_property name="ElementShortName">Mem[0:1023][127:0]</obj_property>
+      <obj_property name="ObjectShortName">Mem[0:1023][127:0]</obj_property>
    </wvobject>
    <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_backward_fifo/i" type="array">
       <obj_property name="ElementShortName">i[31:0]</obj_property>

@@ -22,7 +22,7 @@
 
 module axis2ddr_top#(
         //the max depth of the fifo: 2^FIFO_AW
-        parameter FIFO_AW = 8
+        parameter FIFO_AW = 10
 		// AXI4Stream sink: Data Width
     ,   parameter AXIS_DATA_WIDTH = 32
 		// AXI4 sink: Data Width as same as the data depth of the fifo
@@ -35,7 +35,7 @@ module axis2ddr_top#(
     ,   parameter frame_delay = 2
 
 		// Base address of targeted slave
-	,   parameter  C_M_TARGET_SLAVE_BASE_ADDR	= 32'h00000000
+	,   parameter  C_M_TARGET_SLAVE_BASE_ADDR	= 32'h10000000
 		// Burst Length. Supports 1, 2, 4, 8, 16, 32, 64, 128, 256 burst lengths
 	,   parameter integer C_M_AXI_BURST_LEN	= 16
 		// Thread ID Width

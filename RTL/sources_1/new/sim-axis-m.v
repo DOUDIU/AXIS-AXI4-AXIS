@@ -25,7 +25,7 @@ module maxis_v1_0_M00_AXIS #
 	input wire M_AXIS_TREADY
 );
 // Total number of output data
-localparam NUMBER_OF_OUTPUT_WORDS = 1280/4;
+localparam NUMBER_OF_OUTPUT_WORDS = PIXELS_HORIZONTAL/4;
 // function called clogb2 that returns an integer which has the 
 // value of the ceiling of the log base 2.
 function integer clogb2 (input integer bit_depth);
@@ -78,8 +78,8 @@ always @(posedge M_AXIS_ACLK)begin
 	else begin
 		case (mst_exec_state)
 			IDLE: 
-				if (vertical_cnt == PIXELS_VERTICAL - 1)
-					mst_exec_state <= INIT_COUNTER;
+				if (vertical_cnt == 0)
+					mst_exec_state <= FRAME_INTERVAL;
 				else 
 					mst_exec_state <= INIT_COUNTER;
 			INIT_COUNTER:
@@ -106,7 +106,7 @@ always @(posedge M_AXIS_ACLK)begin
 				// The slave starts accepting tdata when 
 				// there tvalid is asserted to mark the 
 				// presence of valid streaming data
-				if ( count == 300 - 1 )	begin 
+				if ( count == 1000 - 1 )	begin 
 					mst_exec_state <= SEND_STREAM;
 					count <= 0;
 				end

@@ -197,7 +197,8 @@ always@(posedge S_AXIS_ACLK) begin
     end
 end
 
-assign  brd_rdy = burst_en || (read_pointer[1:0] == 2'b11);//burst_en || ((!M_AXIS_TLAST) && tx_en);
+//assign  brd_rdy = burst_en || (read_pointer[1:0] == 2'b11);//burst_en || ((!M_AXIS_TLAST) && tx_en);
+assign  brd_rdy = burst_en || ((read_pointer[1:0] == 2'b11) && !axis_tlast);
 
 assign M_AXIS_TDATA 	= (brd_din_buf>>(96 - (read_pointer[1:0])*32));
 
