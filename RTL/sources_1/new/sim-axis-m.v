@@ -22,8 +22,12 @@ module maxis_v1_0_M00_AXIS #
 	// TLAST indicates the boundary of a packet.
 	output wire M_AXIS_TLAST,
 	// TREADY indicates that the slave can accept a transfer in the current cycle.
-	input wire M_AXIS_TREADY
+	input wire M_AXIS_TREADY,
+
+	output wire M_AXIS_USER
 );
+
+assign M_AXIS_USER = M_AXIS_TVALID & M_AXIS_TREADY & (M_AXIS_TDATA[27:0] == 0);
 // Total number of output data
 localparam NUMBER_OF_OUTPUT_WORDS = PIXELS_HORIZONTAL/4;
 // function called clogb2 that returns an integer which has the 

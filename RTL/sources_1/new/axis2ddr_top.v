@@ -73,6 +73,8 @@ module axis2ddr_top#(
     // Data is in valid
     ,   input wire  S_AXIS_TVALID
 
+    ,   input wire  S_AXIS_USER
+
 
 //----------------------------------------------------
 // AXIS maxter port
@@ -91,6 +93,8 @@ module axis2ddr_top#(
     ,   output wire  M_AXIS_TLAST
 	// Master Stream Ports. TVALID indicates that the master is driving a valid transfer, A transfer takes place when both TVALID and TREADY are asserted.
     ,   output wire  M_AXIS_TVALID
+
+    ,   output wire  M_AXIS_USER
 
 
 //----------------------------------------------------
@@ -262,6 +266,7 @@ axis2fifo #(
     ,   .S_AXIS_TSTRB       (S_AXIS_TSTRB       )
     ,   .S_AXIS_TLAST       (S_AXIS_TLAST       )
     ,   .S_AXIS_TVALID      (S_AXIS_TVALID      )
+    ,   .S_AXIS_USER        (S_AXIS_USER        )
 
 
 //----------------------------------------------------
@@ -294,6 +299,7 @@ fifo2axis #(
 	,   .M_AXIS_TSTRB       (M_AXIS_TSTRB       )
 	,   .M_AXIS_TLAST       (M_AXIS_TLAST       )
 	,   .M_AXIS_TREADY      (M_AXIS_TREADY      )
+    ,   .M_AXIS_USER        (M_AXIS_USER        )
 
 //----------------------------------------------------
 // AXIS slave port
@@ -304,6 +310,7 @@ fifo2axis #(
     ,   .S_AXIS_TSTRB       (S_AXIS_TSTRB       )
     ,   .S_AXIS_TLAST       (S_AXIS_TLAST       )
     ,   .S_AXIS_TVALID      (S_AXIS_TVALID      )
+    ,   .S_AXIS_USER        (S_AXIS_USER        )
 
 //----------------------------------------------------
 // backward FIFO read interface

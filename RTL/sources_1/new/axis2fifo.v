@@ -45,6 +45,8 @@ module axis2fifo#(
     // Data is in valid
     ,   input wire  S_AXIS_TVALID
 
+    ,   input wire  S_AXIS_USER
+
 //----------------------------------------------------
 // FIFO forward: address related
     ,   input   wire fwr_rdy  
@@ -60,11 +62,22 @@ assign  S_AXIS_TREADY = (!fwr_full) & fwr_rdy;
 reg     [$clog2(data_interval)-1 : 0]   data_buf_cnt;
 reg     [AXI4_DATA_WIDTH-1 : 0]         fifo_data_buf;
 
+reg     frame_valid = 0;
+
+always@(posedge S_AXIS_ACLK or negedge S_AXIS_ARESETN) begin
+    if(!S_AXIS_ARESETN) begin
+        frame_valid     <=  0;
+    end
+    else if(S_AXIS_USER & S_AXIS_TREADY & S_AXIS_TVALID) begin
+        frame_valid     <=  1;
+    end
+end
+
 always@(posedge S_AXIS_ACLK or negedge S_AXIS_ARESETN) begin
     if(!S_AXIS_ARESETN) begin
         data_buf_cnt    <=  0;
     end
-    else if(S_AXIS_TREADY & S_AXIS_TVALID) begin
+    else if(S_AXIS_TREADY & S_AXIS_TVALID & (S_AXIS_USER | frame_valid)) begin
         data_buf_cnt    <=  data_buf_cnt == data_interval? 0 : data_buf_cnt + 1;
     end
 end
@@ -73,7 +86,7 @@ always@(posedge S_AXIS_ACLK or negedge S_AXIS_ARESETN) begin
     if(!S_AXIS_ARESETN) begin
         fifo_data_buf   <=  0;
     end
-    else if(S_AXIS_TREADY & S_AXIS_TVALID) begin
+    else if(S_AXIS_TREADY & S_AXIS_TVALID & (S_AXIS_USER | frame_valid)) begin
         fifo_data_buf   <=  {fifo_data_buf[0+:AXI4_DATA_WIDTH-AXIS_DATA_WIDTH], S_AXIS_TDATA};
     end
 end
@@ -83,7 +96,7 @@ always@(posedge S_AXIS_ACLK or negedge S_AXIS_ARESETN) begin
         fwr_vld <= 1'b0;
         fwr_dat <= 0;
     end 
-    else if((data_buf_cnt == data_interval-1) & S_AXIS_TREADY & S_AXIS_TVALID) begin
+    else if((data_buf_cnt == data_interval-1) & S_AXIS_TREADY & S_AXIS_TVALID & (S_AXIS_USER | frame_valid)) begin
         fwr_vld <= 1'b1;
         fwr_dat <= {fifo_data_buf[0+:AXI4_DATA_WIDTH-AXIS_DATA_WIDTH], S_AXIS_TDATA}; 
     end

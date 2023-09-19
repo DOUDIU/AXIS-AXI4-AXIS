@@ -51,6 +51,8 @@ module fifo2axis#(
 	// TREADY indicates that the slave can accept a transfer in the current cycle.
 	,   input wire M_AXIS_TREADY
 
+	,   output wire M_AXIS_USER
+
 //----------------------------------------------------
 // AXIS slave port
 // introduced to align the interval with the original input
@@ -69,6 +71,8 @@ module fifo2axis#(
     // Data is in valid
     ,   input wire  S_AXIS_TVALID
 
+	,   input wire S_AXIS_USER
+
 //----------------------------------------------------
 // backward FIFO read interface
     ,   output  wire           	brd_rdy  
@@ -77,6 +81,13 @@ module fifo2axis#(
     ,   input   wire           	brd_empty
     ,   input   wire [FAW:0] 	brd_cnt  
 );
+
+
+reg	[10:0]   	frame_cnt = 0;
+wire            burst_en;
+reg [FDW-1:0] 	brd_din_buf;
+reg [3:0]       din_buf_cnt;
+reg				m_axis_user_flag;
 
 // Total number of output data
 localparam NUMBER_OF_OUTPUT_WORDS = PIXELS_HORIZONTAL/4;
@@ -171,36 +182,21 @@ always @( posedge M_AXIS_ACLK )begin
 end
 
 
-reg     [9:0]   frame_cnt;
-reg     [10:0]  vertical_cnt;
-wire            burst_en;
-reg [FDW-1:0] 	brd_din_buf;
-reg [3:0]       din_buf_cnt;
+assign  burst_en = (frame_cnt == FRAME_DELAY) & S_AXIS_TLAST;
+assign  brd_rdy = burst_en || ((read_pointer[1:0] == 2'b11) && !axis_tlast);
 
-assign  burst_en = (frame_cnt == FRAME_DELAY - 1) & S_AXIS_TLAST;
+assign 	M_AXIS_TDATA = (brd_din_buf>>(96 - (read_pointer[1:0])*32));
+assign	M_AXIS_USER = m_axis_user_flag & tx_en;
 
-always@(posedge S_AXIS_ACLK) begin
-    if(!S_AXIS_ARESETN) begin
-        vertical_cnt   <=  0;
-    end
-    else if(S_AXIS_TLAST)begin
-        vertical_cnt   <=  (vertical_cnt >= PIXELS_VERTICAL - 1) ? 0 : (vertical_cnt + 1);
-    end
-end
 
 always@(posedge S_AXIS_ACLK) begin
     if(!S_AXIS_ARESETN) begin
         frame_cnt   <=  0;
     end
-    else if(S_AXIS_TLAST & (vertical_cnt == PIXELS_VERTICAL - 1)) begin
-        frame_cnt   <=  (frame_cnt >= FRAME_DELAY - 1) ? frame_cnt : (frame_cnt + 1);
+    else if(S_AXIS_USER & S_AXIS_TVALID & S_AXIS_TREADY) begin
+        frame_cnt   <=  (frame_cnt >= FRAME_DELAY) ? frame_cnt : (frame_cnt + 1);
     end
 end
-
-//assign  brd_rdy = burst_en || (read_pointer[1:0] == 2'b11);//burst_en || ((!M_AXIS_TLAST) && tx_en);
-assign  brd_rdy = burst_en || ((read_pointer[1:0] == 2'b11) && !axis_tlast);
-
-assign M_AXIS_TDATA 	= (brd_din_buf>>(96 - (read_pointer[1:0])*32));
 
 always@(posedge S_AXIS_ACLK) begin
     if(!S_AXIS_ARESETN) begin
@@ -211,5 +207,16 @@ always@(posedge S_AXIS_ACLK) begin
     end
 end
 
+always@(posedge S_AXIS_ACLK) begin
+    if(!S_AXIS_ARESETN) begin
+        m_axis_user_flag   <=  0;
+    end
+    else if(S_AXIS_USER)begin
+        m_axis_user_flag   <=  1;
+    end
+	else if(M_AXIS_USER) begin
+        m_axis_user_flag   <=  0;
+	end
+end
 
 endmodule
