@@ -182,7 +182,7 @@ always @( posedge M_AXIS_ACLK )begin
 end
 
 
-assign  burst_en = (frame_cnt == FRAME_DELAY) & S_AXIS_TLAST;
+assign  burst_en = (frame_cnt == FRAME_DELAY) & S_AXIS_TLAST & S_AXIS_TREADY & S_AXIS_TVALID;
 assign  brd_rdy = burst_en || ((read_pointer[1:0] == 2'b11) && !axis_tlast);
 
 assign 	M_AXIS_TDATA = (brd_din_buf>>(96 - (read_pointer[1:0])*32));
@@ -211,7 +211,7 @@ always@(posedge S_AXIS_ACLK) begin
     if(!S_AXIS_ARESETN) begin
         m_axis_user_flag   <=  0;
     end
-    else if(S_AXIS_USER)begin
+    else if(S_AXIS_USER & S_AXIS_TVALID & S_AXIS_TREADY) begin
         m_axis_user_flag   <=  1;
     end
 	else if(M_AXIS_USER) begin

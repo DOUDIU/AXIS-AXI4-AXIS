@@ -146,7 +146,7 @@ axis2ddr_top #(
     ,   .S_AXIS_TSTRB           (AXIS_TSTRB     )
     ,   .S_AXIS_TLAST           (AXIS_TLAST     )
     ,   .S_AXIS_TVALID          (AXIS_TVALID    )
-	,	.S_AXIS_USER			(AXIS_USER		)
+	,	.S_AXIS_TUSER			(AXIS_USER		)
 
 //----------------------------------------------------
 // AXIS master port
@@ -157,7 +157,7 @@ axis2ddr_top #(
     ,   .M_AXIS_TSTRB           ()
     ,   .M_AXIS_TLAST           ()
     ,   .M_AXIS_TVALID          ()
-	,	.M_AXIS_USER			()
+	,	.M_AXIS_TUSER			()
 
 //----------------------------------------------------
 // AXI-FULL master port

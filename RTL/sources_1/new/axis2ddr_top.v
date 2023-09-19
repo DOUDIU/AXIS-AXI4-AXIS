@@ -32,7 +32,7 @@ module axis2ddr_top#(
         // Vertical resolution
     ,   parameter pixels_vertical = 1024
         // Delay number of the frame, the max value is 1024(constrained by the bits of the counter)
-    ,   parameter frame_delay = 2
+    ,   parameter frame_delay = 10
 
 		// Base address of targeted slave
 	,   parameter  C_M_TARGET_SLAVE_BASE_ADDR	= 32'h10000000
@@ -72,8 +72,8 @@ module axis2ddr_top#(
     ,   input wire  S_AXIS_TLAST
     // Data is in valid
     ,   input wire  S_AXIS_TVALID
-
-    ,   input wire  S_AXIS_USER
+    // Indicate the start of one frame
+    ,   input wire  S_AXIS_TUSER
 
 
 //----------------------------------------------------
@@ -93,8 +93,8 @@ module axis2ddr_top#(
     ,   output wire  M_AXIS_TLAST
 	// Master Stream Ports. TVALID indicates that the master is driving a valid transfer, A transfer takes place when both TVALID and TREADY are asserted.
     ,   output wire  M_AXIS_TVALID
-
-    ,   output wire  M_AXIS_USER
+    // Indicate the start of one frame
+    ,   output wire  M_AXIS_TUSER
 
 
 //----------------------------------------------------
@@ -266,7 +266,7 @@ axis2fifo #(
     ,   .S_AXIS_TSTRB       (S_AXIS_TSTRB       )
     ,   .S_AXIS_TLAST       (S_AXIS_TLAST       )
     ,   .S_AXIS_TVALID      (S_AXIS_TVALID      )
-    ,   .S_AXIS_USER        (S_AXIS_USER        )
+    ,   .S_AXIS_USER        (S_AXIS_TUSER       )
 
 
 //----------------------------------------------------
@@ -299,7 +299,7 @@ fifo2axis #(
 	,   .M_AXIS_TSTRB       (M_AXIS_TSTRB       )
 	,   .M_AXIS_TLAST       (M_AXIS_TLAST       )
 	,   .M_AXIS_TREADY      (M_AXIS_TREADY      )
-    ,   .M_AXIS_USER        (M_AXIS_USER        )
+    ,   .M_AXIS_USER        (M_AXIS_TUSER       )
 
 //----------------------------------------------------
 // AXIS slave port
@@ -310,7 +310,7 @@ fifo2axis #(
     ,   .S_AXIS_TSTRB       (S_AXIS_TSTRB       )
     ,   .S_AXIS_TLAST       (S_AXIS_TLAST       )
     ,   .S_AXIS_TVALID      (S_AXIS_TVALID      )
-    ,   .S_AXIS_USER        (S_AXIS_USER        )
+    ,   .S_AXIS_USER        (S_AXIS_TUSER       )
 
 //----------------------------------------------------
 // backward FIFO read interface
