@@ -25,6 +25,8 @@ wire    AXIS_TLAST;
 wire    [_DATA_WIDTH_-1 : 0]        AXIS_TDATA;
 wire    [(_DATA_WIDTH_/8)-1 : 0]    AXIS_TSTRB;
 
+wire   [_DATA_WIDTH_-1 : 0]         M_AXIS_TDATA;
+
 //AXI-FULL interface
     wire                                    M_AXI_ACLK     
 ;   wire                                    M_AXI_ARESETN  
@@ -95,7 +97,7 @@ maxis_v1_0_M00_AXIS#
 	// Width of S_AXIS address bus. The slave accepts the read and write addresses of width C_M_AXIS_TDATA_WIDTH.
 	    .C_M_AXIS_TDATA_WIDTH (_DATA_WIDTH_)
 	// Start count is the number of clock cycles the master will wait before initiating/issuing any transaction.
-	,   .C_M_START_COUNT (3)
+	,   .C_M_START_COUNT (1000)
 )u_maxis_v1_0_M00_AXIS(
 	// Global ports
 	    .M_AXIS_ACLK    		(AXIS_ACLK      )
@@ -152,12 +154,12 @@ axis2ddr_top #(
 // AXIS master port
     ,   .M_AXIS_ACLK            (AXIS_ACLK      )
     ,   .M_AXIS_ARESETN         (AXIS_ARESETN   )
-    ,   .M_AXIS_TREADY          (1)
-    ,   .M_AXIS_TDATA           ()
-    ,   .M_AXIS_TSTRB           ()
-    ,   .M_AXIS_TLAST           ()
-    ,   .M_AXIS_TVALID          ()
-	,	.M_AXIS_TUSER			()
+    ,   .M_AXIS_TREADY          (1)//(M_AXIS_TREADY  )
+    ,   .M_AXIS_TDATA           (M_AXIS_TDATA   )
+    ,   .M_AXIS_TSTRB           (M_AXIS_TSTRB   )
+    ,   .M_AXIS_TLAST           (M_AXIS_TLAST   )
+    ,   .M_AXIS_TVALID          (M_AXIS_TVALID  )
+	,	.M_AXIS_TUSER			(M_AXIS_TUSER	)
 
 //----------------------------------------------------
 // AXI-FULL master port
@@ -281,7 +283,7 @@ axis2ddr_top #(
 		,   .S_AXI_RREADY       (M_AXI_RREADY   )
 	);
 
-// VIRTUAL AXI-STREAM MEMORY
+// saxis_v1_0_S00_AXIS#(
 //     // Users to add parameters here
 
 //     // User parameters ends
@@ -296,21 +298,20 @@ axis2ddr_top #(
 //     // Do not modify the ports beyond this line
 
 //     // AXI4Stream sink: Clock
-//         .S_AXIS_ACLK    (AXIS_ACLK      )
+//         .S_AXIS_ACLK    (M_AXI_ACLK      	)
 //     // AXI4Stream sink: Reset
-//     ,   .S_AXIS_ARESETN (AXIS_ARESETN   )
+//     ,   .S_AXIS_ARESETN (M_AXI_ARESETN   	)
 //     // Ready to accept data in
-//     ,   .S_AXIS_TREADY  (AXIS_TREADY    )
+//     ,   .S_AXIS_TREADY  (M_AXIS_TREADY    	)
 //     // Data in
-//     ,   .S_AXIS_TDATA   (AXIS_TDATA     )
+//     ,   .S_AXIS_TDATA   (M_AXIS_TDATA     	)
 //     // Byte qualifier
-//     ,   .S_AXIS_TSTRB   (AXIS_TSTRB     )
+//     ,   .S_AXIS_TSTRB   (M_AXIS_TSTRB     	)
 //     // Indicates boundary of last packet
-//     ,   .S_AXIS_TLAST   (AXIS_TLAST     )
+//     ,   .S_AXIS_TLAST   (M_AXIS_TLAST     	)
 //     // Data is in valid
-//     ,   .S_AXIS_TVALID  (AXIS_TVALID    )
+//     ,   .S_AXIS_TVALID  (M_AXIS_TVALID    	)
 // );
-
 
 
 

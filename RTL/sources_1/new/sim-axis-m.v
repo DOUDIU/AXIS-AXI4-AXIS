@@ -58,7 +58,7 @@ reg [1:0] mst_exec_state;
 reg [bit_num-1:0] read_pointer;
 // AXI Stream internal signals 
 //wait counter. The master waits for the user defined number of clock cycles before initiating a transfer.
-reg [10 : 0] count;
+reg [20 : 0] count;
 //streaming data valid 
 wire axis_tvalid;
 //Last of the streaming data 
@@ -110,7 +110,7 @@ always @(posedge M_AXIS_ACLK)begin
 				// The slave starts accepting tdata when 
 				// there tvalid is asserted to mark the 
 				// presence of valid streaming data
-				if ( count == 1000 - 1 )	begin 
+				if ( count == 10000 - 1 )	begin 
 					mst_exec_state <= SEND_STREAM;
 					count <= 0;
 				end

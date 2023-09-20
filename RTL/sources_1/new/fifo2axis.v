@@ -84,7 +84,7 @@ module fifo2axis#(
 
 
 reg	[10:0]   	frame_cnt = 0;
-wire            burst_en;
+reg             burst_en;
 reg [FDW-1:0] 	brd_din_buf;
 reg [3:0]       din_buf_cnt;
 reg				m_axis_user_flag;
@@ -182,8 +182,23 @@ always @( posedge M_AXIS_ACLK )begin
 end
 
 
-assign  burst_en = (frame_cnt == FRAME_DELAY) & S_AXIS_TLAST & S_AXIS_TREADY & S_AXIS_TVALID;
-assign  brd_rdy = burst_en || ((read_pointer[1:0] == 2'b11) && !axis_tlast);
+//assign  burst_en = (frame_cnt == FRAME_DELAY) & (S_AXIS_USER | tx_done) & (pixel_cnt <= 327679);
+
+always@(posedge S_AXIS_ACLK) begin
+	if(!S_AXIS_ARESETN) begin
+		burst_en   <=  0;
+	end
+	else if((frame_cnt == FRAME_DELAY) & (S_AXIS_USER | tx_done) & (pixel_cnt < 327679)) begin
+		burst_en   <=  1;
+	end
+	else begin
+		burst_en   <=  0;
+	end
+end
+
+
+
+assign  brd_rdy = burst_en || (tx_en && (read_pointer[1:0] == 2'b11) && !axis_tlast);
 
 assign 	M_AXIS_TDATA = (brd_din_buf>>(96 - (read_pointer[1:0])*32));
 assign	M_AXIS_USER = m_axis_user_flag & tx_en;
@@ -216,6 +231,22 @@ always@(posedge S_AXIS_ACLK) begin
     end
 	else if(M_AXIS_USER) begin
         m_axis_user_flag   <=  0;
+	end
+end
+reg	[31:0]	pixel_cnt;
+
+always@(posedge S_AXIS_ACLK) begin
+    if(!S_AXIS_ARESETN) begin
+		pixel_cnt	<=	0;
+	end
+	else if(S_AXIS_USER)begin
+		pixel_cnt	<=	0;
+	end
+	else if(tx_en & (pixel_cnt>=327679))begin
+		pixel_cnt	<=	0;
+	end
+	else if(tx_en)begin
+		pixel_cnt	<=	pixel_cnt + 1;
 	end
 end
 

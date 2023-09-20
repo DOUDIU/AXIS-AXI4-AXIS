@@ -11,15 +11,19 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="3,344,042.600 ns"></ZoomStartTime>
-      <ZoomEndTime time="3,344,432.201 ns"></ZoomEndTime>
-      <Cursor1Time time="3,344,235.000 ns"></Cursor1Time>
+      <ZoomStartTime time="9.656365000 ms"></ZoomStartTime>
+      <ZoomEndTime time="29.316365001 ms"></ZoomEndTime>
+      <Cursor1Time time="13.736365000 ms"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="300"></NameColumnWidth>
-      <ValueColumnWidth column_width="280"></ValueColumnWidth>
+      <ValueColumnWidth column_width="262"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="16" />
+   <WVObjectSize size="20" />
+   <wave_markers>
+      <marker time="6594555000" label="" />
+      <marker time="44007535000" label="" />
+   </wave_markers>
    <wvobject type="divider" fp_name="divider42">
       <obj_property name="label">AXIS-SLAVE</obj_property>
       <obj_property name="DisplayName">label</obj_property>
@@ -261,6 +265,10 @@
          <obj_property name="ElementShortName">M_AXIS_TVALID</obj_property>
          <obj_property name="ObjectShortName">M_AXIS_TVALID</obj_property>
       </wvobject>
+      <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_fifo2axis_maxter/M_AXIS_TREADY" type="logic">
+         <obj_property name="ElementShortName">M_AXIS_TREADY</obj_property>
+         <obj_property name="ObjectShortName">M_AXIS_TREADY</obj_property>
+      </wvobject>
       <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_fifo2axis_maxter/M_AXIS_TDATA" type="array">
          <obj_property name="ElementShortName">M_AXIS_TDATA[31:0]</obj_property>
          <obj_property name="ObjectShortName">M_AXIS_TDATA[31:0]</obj_property>
@@ -275,13 +283,11 @@
          <obj_property name="ElementShortName">M_AXIS_TLAST</obj_property>
          <obj_property name="ObjectShortName">M_AXIS_TLAST</obj_property>
       </wvobject>
-      <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_fifo2axis_maxter/M_AXIS_TREADY" type="logic">
-         <obj_property name="ElementShortName">M_AXIS_TREADY</obj_property>
-         <obj_property name="ObjectShortName">M_AXIS_TREADY</obj_property>
-      </wvobject>
       <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_fifo2axis_maxter/M_AXIS_USER" type="logic">
          <obj_property name="ElementShortName">M_AXIS_USER</obj_property>
          <obj_property name="ObjectShortName">M_AXIS_USER</obj_property>
+         <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
       </wvobject>
    </wvobject>
    <wvobject type="divider" fp_name="divider196">
@@ -379,7 +385,6 @@
    <wvobject fp_name="group113" type="group">
       <obj_property name="label">BACKWARD-FIFO</obj_property>
       <obj_property name="DisplayName">label</obj_property>
-      <obj_property name="isExpanded"></obj_property>
       <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_backward_fifo/rst" type="logic">
          <obj_property name="ElementShortName">rst</obj_property>
          <obj_property name="ObjectShortName">rst</obj_property>
@@ -468,10 +473,28 @@
    <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_fifo2axis_maxter/burst_en" type="logic">
       <obj_property name="ElementShortName">burst_en</obj_property>
       <obj_property name="ObjectShortName">burst_en</obj_property>
+      <obj_property name="CustomSignalColor">#808000</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject fp_name="vbus128" type="vbus">
+      <obj_property name="label">read_pointer[1:0]</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_fifo2axis_maxter/read_pointer[1]" type="logic">
+         <obj_property name="ElementShortName">[1]</obj_property>
+         <obj_property name="ObjectShortName">[1]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_fifo2axis_maxter/read_pointer[0]" type="logic">
+         <obj_property name="ElementShortName">[0]</obj_property>
+         <obj_property name="ObjectShortName">[0]</obj_property>
+      </wvobject>
    </wvobject>
    <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_fifo2axis_maxter/read_pointer" type="array">
       <obj_property name="ElementShortName">read_pointer[8:0]</obj_property>
       <obj_property name="ObjectShortName">read_pointer[8:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_fifo2axis_maxter/tx_en" type="logic">
+      <obj_property name="ElementShortName">tx_en</obj_property>
+      <obj_property name="ObjectShortName">tx_en</obj_property>
    </wvobject>
    <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_fifo2axis_maxter/axis_tlast" type="logic">
       <obj_property name="ElementShortName">axis_tlast</obj_property>
@@ -484,5 +507,14 @@
    <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_fifo2axis_maxter/FRAME_DELAY" type="array">
       <obj_property name="ElementShortName">FRAME_DELAY[31:0]</obj_property>
       <obj_property name="ObjectShortName">FRAME_DELAY[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_fifo2axis_maxter/pixel_cnt" type="array">
+      <obj_property name="ElementShortName">pixel_cnt[31:0]</obj_property>
+      <obj_property name="ObjectShortName">pixel_cnt[31:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/u_fifo2axis_maxter/mst_exec_state" type="array">
+      <obj_property name="ElementShortName">mst_exec_state[1:0]</obj_property>
+      <obj_property name="ObjectShortName">mst_exec_state[1:0]</obj_property>
    </wvobject>
 </wave_config>

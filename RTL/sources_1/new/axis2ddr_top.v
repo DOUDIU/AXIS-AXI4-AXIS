@@ -32,7 +32,7 @@ module axis2ddr_top#(
         // Vertical resolution
     ,   parameter pixels_vertical = 1024
         // Delay number of the frame, the max value is 1024(constrained by the bits of the counter)
-    ,   parameter frame_delay = 10
+    ,   parameter frame_delay = 1
 
 		// Base address of targeted slave
 	,   parameter  C_M_TARGET_SLAVE_BASE_ADDR	= 32'h10000000
