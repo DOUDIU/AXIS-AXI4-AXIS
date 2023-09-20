@@ -258,8 +258,20 @@ axis2fifo #(
     ,   .AXI4_DATA_WIDTH    (AXI4_DATA_WIDTH    )
 )u_axis_salve2fifo(
 //----------------------------------------------------
+// AXIS maxter port
+	    .M_AXIS_ACLK        (M_AXIS_ACLK        )
+	,   .M_AXIS_ARESETN     (M_AXIS_ARESETN     )
+	,   .M_AXIS_TVALID      (M_AXIS_TVALID      )
+	,   .M_AXIS_TDATA       (M_AXIS_TDATA       )
+	,   .M_AXIS_TSTRB       (M_AXIS_TSTRB       )
+	,   .M_AXIS_TLAST       (M_AXIS_TLAST       )
+	,   .M_AXIS_TREADY      (M_AXIS_TREADY      )
+    ,   .M_AXIS_USER        (M_AXIS_TUSER       )
+
+
+//----------------------------------------------------
 // AXIS slave port
-        .S_AXIS_ACLK        (S_AXIS_ACLK        )
+    ,   .S_AXIS_ACLK        (S_AXIS_ACLK        )
     ,   .S_AXIS_ARESETN     (S_AXIS_ARESETN     )
     ,   .S_AXIS_TREADY      (S_AXIS_TREADY      )
     ,   .S_AXIS_TDATA       (S_AXIS_TDATA       )

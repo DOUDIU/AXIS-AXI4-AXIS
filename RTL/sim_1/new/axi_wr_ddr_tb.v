@@ -97,7 +97,7 @@ maxis_v1_0_M00_AXIS#
 	// Width of S_AXIS address bus. The slave accepts the read and write addresses of width C_M_AXIS_TDATA_WIDTH.
 	    .C_M_AXIS_TDATA_WIDTH (_DATA_WIDTH_)
 	// Start count is the number of clock cycles the master will wait before initiating/issuing any transaction.
-	,   .C_M_START_COUNT (1000)
+	,   .C_M_START_COUNT (30)
 )u_maxis_v1_0_M00_AXIS(
 	// Global ports
 	    .M_AXIS_ACLK    		(AXIS_ACLK      )
@@ -154,7 +154,7 @@ axis2ddr_top #(
 // AXIS master port
     ,   .M_AXIS_ACLK            (AXIS_ACLK      )
     ,   .M_AXIS_ARESETN         (AXIS_ARESETN   )
-    ,   .M_AXIS_TREADY          (1)//(M_AXIS_TREADY  )
+    ,   .M_AXIS_TREADY          (M_AXIS_TREADY  )
     ,   .M_AXIS_TDATA           (M_AXIS_TDATA   )
     ,   .M_AXIS_TSTRB           (M_AXIS_TSTRB   )
     ,   .M_AXIS_TLAST           (M_AXIS_TLAST   )
@@ -283,35 +283,35 @@ axis2ddr_top #(
 		,   .S_AXI_RREADY       (M_AXI_RREADY   )
 	);
 
-// saxis_v1_0_S00_AXIS#(
-//     // Users to add parameters here
+saxis_v1_0_S00_AXIS#(
+    // Users to add parameters here
 
-//     // User parameters ends
-//     // Do not modify the parameters beyond this line
+    // User parameters ends
+    // Do not modify the parameters beyond this line
 
-//     // AXI4Stream sink: Data Width
-//         .C_S_AXIS_TDATA_WIDTH (32)
-// )u_saxis_v1_0_S00_AXIS(
-//     // Users to add ports here
+    // AXI4Stream sink: Data Width
+        .C_S_AXIS_TDATA_WIDTH (32)
+)u_saxis_v1_0_S00_AXIS(
+    // Users to add ports here
 
-//     // User ports ends
-//     // Do not modify the ports beyond this line
+    // User ports ends
+    // Do not modify the ports beyond this line
 
-//     // AXI4Stream sink: Clock
-//         .S_AXIS_ACLK    (M_AXI_ACLK      	)
-//     // AXI4Stream sink: Reset
-//     ,   .S_AXIS_ARESETN (M_AXI_ARESETN   	)
-//     // Ready to accept data in
-//     ,   .S_AXIS_TREADY  (M_AXIS_TREADY    	)
-//     // Data in
-//     ,   .S_AXIS_TDATA   (M_AXIS_TDATA     	)
-//     // Byte qualifier
-//     ,   .S_AXIS_TSTRB   (M_AXIS_TSTRB     	)
-//     // Indicates boundary of last packet
-//     ,   .S_AXIS_TLAST   (M_AXIS_TLAST     	)
-//     // Data is in valid
-//     ,   .S_AXIS_TVALID  (M_AXIS_TVALID    	)
-// );
+    // AXI4Stream sink: Clock
+        .S_AXIS_ACLK    (M_AXI_ACLK      	)
+    // AXI4Stream sink: Reset
+    ,   .S_AXIS_ARESETN (M_AXI_ARESETN   	)
+    // Ready to accept data in
+    ,   .S_AXIS_TREADY  (M_AXIS_TREADY    	)
+    // Data in
+    ,   .S_AXIS_TDATA   (M_AXIS_TDATA     	)
+    // Byte qualifier
+    ,   .S_AXIS_TSTRB   (M_AXIS_TSTRB     	)
+    // Indicates boundary of last packet
+    ,   .S_AXIS_TLAST   (M_AXIS_TLAST     	)
+    // Data is in valid
+    ,   .S_AXIS_TVALID  (M_AXIS_TVALID    	)
+);
 
 
 

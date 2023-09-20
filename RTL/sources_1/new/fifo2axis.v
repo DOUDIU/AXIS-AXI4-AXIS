@@ -61,7 +61,7 @@ module fifo2axis#(
     // AXI4Stream sink: Reset
     ,   input wire  S_AXIS_ARESETN
     // Ready to accept data in
-    ,   output wire  S_AXIS_TREADY
+    ,   input wire  S_AXIS_TREADY
     // Data in
     ,   input wire [AXIS_DATA_WIDTH-1 : 0] S_AXIS_TDATA
     // Byte qualifier
@@ -82,126 +82,25 @@ module fifo2axis#(
     ,   input   wire [FAW:0] 	brd_cnt  
 );
 
-
-reg	[10:0]   	frame_cnt = 0;
-reg             burst_en;
-reg [FDW-1:0] 	brd_din_buf;
-reg [3:0]       din_buf_cnt;
-reg				m_axis_user_flag;
-
-// Total number of output data
-localparam NUMBER_OF_OUTPUT_WORDS = PIXELS_HORIZONTAL/4;
-// function called clogb2 that returns an integer which has the 
-// value of the ceiling of the log base 2.
-function integer clogb2 (input integer bit_depth);
-begin
-for(clogb2=0; bit_depth>0; clogb2=clogb2+1)
-	bit_depth = bit_depth >> 1;
-end
-endfunction // WAIT_COUNT_BITS is the width of the wait counter.
-localparam integer WAIT_COUNT_BITS = clogb2(C_M_START_COUNT-1);
-// bit_num gives the minimum number of bits needed to address 'depth' size of FIFO.
-localparam bit_num = clogb2(NUMBER_OF_OUTPUT_WORDS);
-// Define the states of state machine 
-// The control state machine oversees the writing of input streaming data to the FIFO,
-// and outputs the streaming data from the FIFO
-parameter [1:0] IDLE 			= 2'b00, 	// This is the initial/idle state
-				INIT_COUNTER 	= 2'b01, 	// This state initializes the counter, once 
-											// the counter reaches C_M_START_COUNT count,
-											// the state machine changes state to SEND_STREAM
-				SEND_STREAM 	= 2'b10; 	// In this state the 
-											// stream data is output through M_AXIS_TDATA
-											// State variable
-
-reg [1:0] mst_exec_state;
-// Example design FIFO read pointer
-reg [bit_num-1:0] read_pointer;
-reg [AXIS_DATA_WIDTH-1:0] m_axis_tdata;
-// AXI Stream internal signals 
-//wait counter. The master waits for the user defined number of clock cycles before initiating a transfer.
-reg [WAIT_COUNT_BITS-1 : 0] count;
-//streaming data valid 
-wire  axis_tvalid;
-//Last of the streaming data 
-wire axis_tlast; 
 wire tx_en;
-//The master has issued all the streaming data stored in FIFO
-wire tx_done;
-// I/O Connections assignments 
-assign M_AXIS_TVALID 	= axis_tvalid;
+reg	[10:0]   	frame_cnt = 0;
+reg	[31:0]		pixel_cnt;
+reg [127:0]		brd_din_buf;
 
-assign M_AXIS_TLAST 	= axis_tlast;
-assign M_AXIS_TSTRB 	= {(AXIS_DATA_WIDTH/8){1'b1}};
-// Control state machine implementation
-always @(posedge M_AXIS_ACLK)begin
-	if (!M_AXIS_ARESETN)
-	// Synchronous reset (active low)
-	begin 
-		mst_exec_state <= IDLE;
-		count <= 0;
-	end
-	else begin
-		case (mst_exec_state)
-			IDLE: 
-                if(burst_en) begin
-				    mst_exec_state <= SEND_STREAM;
-                end
-			SEND_STREAM:
-				// The example design streaming master functionality starts // when the master drives output tdata from the FIFO and the slave // has finished storing the S_AXIS_TDATA
-				if(tx_done) begin 
-					mst_exec_state <= IDLE;
-				end
-				else begin 
-					mst_exec_state <= SEND_STREAM;
-				end
-		endcase
-	end
-end
-//tvalid generation 
-//axis_tvalid is asserted when the control state machine's state is SEND_STREAM and
-//number of output streaming data is less than the NUMBER_OF_OUTPUT_WORDS.
 
-assign axis_tvalid = ((mst_exec_state == SEND_STREAM) && (read_pointer < NUMBER_OF_OUTPUT_WORDS));
 
-// AXI tlast generation
-assign axis_tlast = (read_pointer == NUMBER_OF_OUTPUT_WORDS - 1'b1) && tx_en;
-assign tx_done = axis_tlast;
+assign	M_AXIS_TVALID 	=	S_AXIS_TVALID 	;
+assign  M_AXIS_TSTRB	=	S_AXIS_TSTRB	;
+assign 	M_AXIS_TLAST	=	S_AXIS_TLAST	;
+assign	M_AXIS_USER		=	S_AXIS_USER		;	
+assign 	M_AXIS_TDATA 	= (frame_cnt == FRAME_DELAY + 1) ? (brd_din_buf>>(96 - (pixel_cnt[1:0])*32)) : 0;
+
+assign  brd_rdy = ((frame_cnt == FRAME_DELAY + 1) && (tx_en & pixel_cnt[1:0] == 2'b11)) | ((frame_cnt == FRAME_DELAY) & S_AXIS_USER);
+
+
 //FIFO read enable generation
-assign tx_en = M_AXIS_TREADY && axis_tvalid;
-//Streaming output data is read from FIFO
-always @( posedge M_AXIS_ACLK )begin
-	if(!M_AXIS_ARESETN)	begin
-		read_pointer <= 0;
-	end
-	else if (tx_en)	begin
-		read_pointer <= read_pointer + 32'b1;
-	end
-	else if(mst_exec_state == IDLE) begin
-		read_pointer <= 0;
-	end
-end
+assign tx_en = M_AXIS_TREADY && M_AXIS_TVALID;
 
-
-//assign  burst_en = (frame_cnt == FRAME_DELAY) & (S_AXIS_USER | tx_done) & (pixel_cnt <= 327679);
-
-always@(posedge S_AXIS_ACLK) begin
-	if(!S_AXIS_ARESETN) begin
-		burst_en   <=  0;
-	end
-	else if((frame_cnt == FRAME_DELAY) & (S_AXIS_USER | tx_done) & (pixel_cnt < 327679)) begin
-		burst_en   <=  1;
-	end
-	else begin
-		burst_en   <=  0;
-	end
-end
-
-
-
-assign  brd_rdy = burst_en || (tx_en && (read_pointer[1:0] == 2'b11) && !axis_tlast);
-
-assign 	M_AXIS_TDATA = (brd_din_buf>>(96 - (read_pointer[1:0])*32));
-assign	M_AXIS_USER = m_axis_user_flag & tx_en;
 
 
 always@(posedge S_AXIS_ACLK) begin
@@ -209,7 +108,7 @@ always@(posedge S_AXIS_ACLK) begin
         frame_cnt   <=  0;
     end
     else if(S_AXIS_USER & S_AXIS_TVALID & S_AXIS_TREADY) begin
-        frame_cnt   <=  (frame_cnt >= FRAME_DELAY) ? frame_cnt : (frame_cnt + 1);
+        frame_cnt   <=  (frame_cnt >= FRAME_DELAY + 1) ? frame_cnt : (frame_cnt + 1);
     end
 end
 
@@ -222,31 +121,16 @@ always@(posedge S_AXIS_ACLK) begin
     end
 end
 
-always@(posedge S_AXIS_ACLK) begin
-    if(!S_AXIS_ARESETN) begin
-        m_axis_user_flag   <=  0;
-    end
-    else if(S_AXIS_USER & S_AXIS_TVALID & S_AXIS_TREADY) begin
-        m_axis_user_flag   <=  1;
-    end
-	else if(M_AXIS_USER) begin
-        m_axis_user_flag   <=  0;
-	end
-end
-reg	[31:0]	pixel_cnt;
 
 always@(posedge S_AXIS_ACLK) begin
     if(!S_AXIS_ARESETN) begin
 		pixel_cnt	<=	0;
 	end
-	else if(S_AXIS_USER)begin
-		pixel_cnt	<=	0;
-	end
-	else if(tx_en & (pixel_cnt>=327679))begin
-		pixel_cnt	<=	0;
-	end
 	else if(tx_en)begin
 		pixel_cnt	<=	pixel_cnt + 1;
+	end
+	else if(pixel_cnt==327680)begin
+		pixel_cnt	<=	0;
 	end
 end
 

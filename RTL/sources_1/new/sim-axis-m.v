@@ -110,7 +110,7 @@ always @(posedge M_AXIS_ACLK)begin
 				// The slave starts accepting tdata when 
 				// there tvalid is asserted to mark the 
 				// presence of valid streaming data
-				if ( count == 10000 - 1 )	begin 
+				if ( count == 1000 - 1 )	begin 
 					mst_exec_state <= SEND_STREAM;
 					count <= 0;
 				end
