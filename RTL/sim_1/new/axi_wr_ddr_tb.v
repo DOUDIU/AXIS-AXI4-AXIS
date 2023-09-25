@@ -151,17 +151,6 @@ axis2ddr_top #(
 	,	.S_AXIS_TUSER			(AXIS_USER		)
 
 //----------------------------------------------------
-// AXIS master port
-    ,   .M_AXIS_ACLK            (AXIS_ACLK      )
-    ,   .M_AXIS_ARESETN         (AXIS_ARESETN   )
-    ,   .M_AXIS_TREADY          (M_AXIS_TREADY  )
-    ,   .M_AXIS_TDATA           (M_AXIS_TDATA   )
-    ,   .M_AXIS_TSTRB           (M_AXIS_TSTRB   )
-    ,   .M_AXIS_TLAST           (M_AXIS_TLAST   )
-    ,   .M_AXIS_TVALID          (M_AXIS_TVALID  )
-	,	.M_AXIS_TUSER			(M_AXIS_TUSER	)
-
-//----------------------------------------------------
 // AXI-FULL master port
     ,   .M_AXI_ACLK             (M_AXI_ACLK     )
     ,   .M_AXI_ARESETN          (M_AXI_ARESETN  )
@@ -282,37 +271,6 @@ axis2ddr_top #(
 		,   .S_AXI_RVALID       (M_AXI_RVALID   )
 		,   .S_AXI_RREADY       (M_AXI_RREADY   )
 	);
-
-saxis_v1_0_S00_AXIS#(
-    // Users to add parameters here
-
-    // User parameters ends
-    // Do not modify the parameters beyond this line
-
-    // AXI4Stream sink: Data Width
-        .C_S_AXIS_TDATA_WIDTH (32)
-)u_saxis_v1_0_S00_AXIS(
-    // Users to add ports here
-
-    // User ports ends
-    // Do not modify the ports beyond this line
-
-    // AXI4Stream sink: Clock
-        .S_AXIS_ACLK    (M_AXI_ACLK      	)
-    // AXI4Stream sink: Reset
-    ,   .S_AXIS_ARESETN (M_AXI_ARESETN   	)
-    // Ready to accept data in
-    ,   .S_AXIS_TREADY  (M_AXIS_TREADY    	)
-    // Data in
-    ,   .S_AXIS_TDATA   (M_AXIS_TDATA     	)
-    // Byte qualifier
-    ,   .S_AXIS_TSTRB   (M_AXIS_TSTRB     	)
-    // Indicates boundary of last packet
-    ,   .S_AXIS_TLAST   (M_AXIS_TLAST     	)
-    // Data is in valid
-    ,   .S_AXIS_TVALID  (M_AXIS_TVALID    	)
-);
-
 
 
 

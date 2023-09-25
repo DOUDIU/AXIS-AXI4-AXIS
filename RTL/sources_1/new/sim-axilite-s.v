@@ -1,7 +1,7 @@
 
 `timescale 1 ns / 1 ps
 
-	module saxi_lite_v1_0_S00_AXI #
+	module saxi_lite_core #
 	(
 		// Users to add parameters here
     	parameter FRAME_DELAY = 2, //max 1024

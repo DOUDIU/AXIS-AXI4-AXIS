@@ -451,16 +451,16 @@ axi_full_core #(
 );
 
 
-saxi_lite_v1_0_S00_AXI #(
+saxi_lite_core #(
     // Width of S_AXI data bus
         .C_S_AXI_DATA_WIDTH	    ( C_S_AXI_DATA_WIDTH    )
     // Width of S_AXI address bus
     ,   .C_S_AXI_ADDR_WIDTH	    ( C_S_AXI_ADDR_WIDTH    )
 
     ,   .FRAME_DELAY            (frame_buffer           )
-)u_saxi_lite_v1_0_S00_AXI(
+)u_saxi_lite_core(
     // Users to add ports here
-        .FRAME_CNT              (frame_cnt      )
+        .frame_cnt          (frame_cnt          )
 
     // User ports ends
     // Do not modify the ports beyond this line

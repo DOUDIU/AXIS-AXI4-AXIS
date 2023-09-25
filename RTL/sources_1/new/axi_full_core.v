@@ -189,13 +189,13 @@ module axi_full_core#(
     ,   input   wire           	frd_empty
     ,   input   wire [FAW:0] 	frd_cnt  
 
-//----------------------------------------------------
-// backward FIFO write interface
-    ,   input   wire           	bwr_rdy  
-    ,   output  reg           	bwr_vld  
-    ,   output  reg  [FDW-1:0] 	bwr_dat  
-    ,   input   wire           	bwr_full
-    ,   input   wire [FAW:0] 	brd_cnt  
+// //----------------------------------------------------
+// // backward FIFO write interface
+//     ,   input   wire           	bwr_rdy  
+//     ,   output  reg           	bwr_vld  
+//     ,   output  reg  [FDW-1:0] 	bwr_dat  
+//     ,   input   wire           	bwr_full
+//     ,   input   wire [FAW:0] 	brd_cnt  
 );
 
 
@@ -614,20 +614,20 @@ module axi_full_core#(
 		end                                       
 	end
                                 
-	always @(posedge M_AXI_ACLK) begin                                                                 
-	    if (M_AXI_ARESETN == 0 || init_txn_pulse == 1'b1) begin
-	        bwr_vld	<=	0;
-			bwr_dat	<=	0;   	                                  
-		end
-		else if(rnext)begin
-	        bwr_vld	<=	1;
-			bwr_dat	<=	M_AXI_RDATA;   
-		end
-		else begin
-	        bwr_vld	<=	0;
-			bwr_dat	<=	0;   	
-		end
-	end
+	// always @(posedge M_AXI_ACLK) begin                                                                 
+	//     if (M_AXI_ARESETN == 0 || init_txn_pulse == 1'b1) begin
+	//         bwr_vld	<=	0;
+	// 		bwr_dat	<=	0;   	                                  
+	// 	end
+	// 	else if(rnext)begin
+	//         bwr_vld	<=	1;
+	// 		bwr_dat	<=	M_AXI_RDATA;   
+	// 	end
+	// 	else begin
+	//         bwr_vld	<=	0;
+	// 		bwr_dat	<=	0;   	
+	// 	end
+	// end
 
 
 	/*                                                                      
@@ -796,21 +796,21 @@ module axi_full_core#(
 					mst_exec_state  <= IDLE_W;                                                            
 				end        
 
-				IDLE_RW:
-				if(frd_cnt >= (PIXELS_HORIZONTAL*8)/FDW) begin                                                            
-					mst_exec_state  <= INIT_WRITE;                                                              
-					ERROR <= 1'b0;
-					compare_done <= 1'b0;
-				end
-				// else if (brd_cnt == 0) begin
-				else if (brd_cnt <= (PIXELS_HORIZONTAL*8)/FDW - 1) begin
-					mst_exec_state <= INIT_READ;                                                          
-					ERROR <= 1'b0;
-					compare_done <= 1'b0;
-				end
-				else begin                                                                                         
-					mst_exec_state  <= IDLE_RW;                                                            
-				end        
+				// IDLE_RW:
+				// if(frd_cnt >= (PIXELS_HORIZONTAL*8)/FDW) begin                                                            
+				// 	mst_exec_state  <= INIT_WRITE;                                                              
+				// 	ERROR <= 1'b0;
+				// 	compare_done <= 1'b0;
+				// end
+				// // else if (brd_cnt == 0) begin
+				// else if (brd_cnt <= (PIXELS_HORIZONTAL*8)/FDW - 1) begin
+				// 	mst_exec_state <= INIT_READ;                                                          
+				// 	ERROR <= 1'b0;
+				// 	compare_done <= 1'b0;
+				// end
+				// else begin                                                                                         
+				// 	mst_exec_state  <= IDLE_RW;                                                            
+				// end        
 
 				INIT_WRITE:                                                                                       
 				// This state is responsible to issue start_single_write pulse to                               
@@ -818,7 +818,7 @@ module axi_full_core#(
 				// issued until burst_write_active signal is asserted.                                          
 				// write controller                                                                             
 				if (writes_done) begin                                                                                         
-					mst_exec_state <= IDLE_RW;                                                              
+					mst_exec_state <= IDLE_W;                                                              
 				end                                                                                           
 				else begin                                                                                         
 					mst_exec_state  <= INIT_WRITE;                                                              
