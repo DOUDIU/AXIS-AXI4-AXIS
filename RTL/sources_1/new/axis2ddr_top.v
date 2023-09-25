@@ -32,7 +32,7 @@ module axis2ddr_top#(
         // Vertical resolution
     ,   parameter pixels_vertical = 1024
         // Delay number of the frame, the max value is 1024(constrained by the bits of the counter)
-    ,   parameter frame_delay = 1
+    ,   parameter frame_buffer = 2
 
 		// Base address of targeted slave
 	,   parameter  C_M_TARGET_SLAVE_BASE_ADDR	= 32'h10000000
@@ -54,6 +54,12 @@ module axis2ddr_top#(
 	,   parameter integer C_M_AXI_RUSER_WIDTH	= 0
 		// Width of User Response Bus
 	,   parameter integer C_M_AXI_BUSER_WIDTH	= 0
+
+    
+		// Width of S_AXI data bus
+	,   parameter integer C_S_AXI_DATA_WIDTH	= 32
+		// Width of S_AXI address bus
+	,	parameter integer C_S_AXI_ADDR_WIDTH	= 4
 )(
 //----------------------------------------------------
 // AXIS slave port
@@ -75,27 +81,68 @@ module axis2ddr_top#(
     // Indicate the start of one frame
     ,   input wire  S_AXIS_TUSER
 
-
 //----------------------------------------------------
-// AXIS maxter port
-    // AXI4Stream sink: Clock
-    ,   input wire  M_AXIS_ACLK
-    // AXI4Stream sink: Reset
-    ,   input wire  M_AXIS_ARESETN
-
-	// TREADY indicates that the slave can accept a transfer in the current cycle.
-    ,   input wire  M_AXIS_TREADY
-	// TDATA is the primary payload that is used to provide the data that is passing across the interface from the master.
-    ,   output wire [AXIS_DATA_WIDTH-1 : 0] M_AXIS_TDATA
-	// TSTRB is the byte qualifier that indicates whether the content of the associated byte of TDATA is processed as a data byte or a position byte.
-    ,   output wire [(AXIS_DATA_WIDTH/8)-1 : 0] M_AXIS_TSTRB
-	// TLAST indicates the boundary of a packet.
-    ,   output wire  M_AXIS_TLAST
-	// Master Stream Ports. TVALID indicates that the master is driving a valid transfer, A transfer takes place when both TVALID and TREADY are asserted.
-    ,   output wire  M_AXIS_TVALID
-    // Indicate the start of one frame
-    ,   output wire  M_AXIS_TUSER
-
+// AXI-LITE slave port
+    // Global Clock Signal
+    ,   input wire  S_AXI_ACLK
+    // Global Reset Signal. This Signal is Active LOW
+    ,   input wire  S_AXI_ARESETN
+    // Write address (issued by master, acceped by Slave)
+    ,   input wire [C_S_AXI_ADDR_WIDTH-1 : 0] S_AXI_AWADDR
+    // Write channel Protection type. This signal indicates the
+        // privilege and security level of the transaction, and whether
+        // the transaction is a data access or an instruction access.
+    ,   input wire [2 : 0] S_AXI_AWPROT
+    // Write address valid. This signal indicates that the master signaling
+        // valid write address and control information.
+    ,   input wire  S_AXI_AWVALID
+    // Write address ready. This signal indicates that the slave is ready
+        // to accept an address and associated control signals.
+    ,   output wire  S_AXI_AWREADY
+    // Write data (issued by master, acceped by Slave) 
+    ,   input wire [C_S_AXI_DATA_WIDTH-1 : 0] S_AXI_WDATA
+    // Write strobes. This signal indicates which byte lanes hold
+        // valid data. There is one write strobe bit for each eight
+        // bits of the write data bus.    
+    ,   input wire [(C_S_AXI_DATA_WIDTH/8)-1 : 0] S_AXI_WSTRB
+    // Write valid. This signal indicates that valid write
+        // data and strobes are available.
+    ,   input wire  S_AXI_WVALID
+    // Write ready. This signal indicates that the slave
+        // can accept the write data.
+    ,   output wire  S_AXI_WREADY
+    // Write response. This signal indicates the status
+        // of the write transaction.
+    ,   output wire [1 : 0] S_AXI_BRESP
+    // Write response valid. This signal indicates that the channel
+        // is signaling a valid write response.
+    ,   output wire  S_AXI_BVALID
+    // Response ready. This signal indicates that the master
+        // can accept a write response.
+    ,   input wire  S_AXI_BREADY
+    // Read address (issued by master, acceped by Slave)
+    ,   input wire [C_S_AXI_ADDR_WIDTH-1 : 0] S_AXI_ARADDR
+    // Protection type. This signal indicates the privilege
+        // and security level of the transaction, and whether the
+        // transaction is a data access or an instruction access.
+    ,   input wire [2 : 0] S_AXI_ARPROT
+    // Read address valid. This signal indicates that the channel
+        // is signaling valid read address and control information.
+    ,   input wire  S_AXI_ARVALID
+    // Read address ready. This signal indicates that the slave is
+        // ready to accept an address and associated control signals.
+    ,   output wire  S_AXI_ARREADY
+    // Read data (issued by slave)
+    ,   output wire [C_S_AXI_DATA_WIDTH-1 : 0] S_AXI_RDATA
+    // Read response. This signal indicates the status of the
+        // read transfer.
+    ,   output wire [1 : 0] S_AXI_RRESP
+    // Read valid. This signal indicates that the channel is
+        // signaling the required read data.
+    ,   output wire  S_AXI_RVALID
+    // Read ready. This signal indicates that the master can
+        // accept the read data and response information.
+    ,   input wire  S_AXI_RREADY
 
 //----------------------------------------------------
 // AXI-FULL master port
@@ -226,29 +273,19 @@ module axis2ddr_top#(
 //----------------------------------------------------
 // wire definition
 
-    wire                            fwr_rdy     ;
-    wire                            fwr_vld     ;
-    wire [AXI4_DATA_WIDTH-1:0]      fwr_dat     ;
-    wire                            fwr_full    ;
-    wire [FIFO_AW:0]                fwr_cnt     ;
+    wire                                fwr_rdy     ;
+    wire                                fwr_vld     ;
+    wire [AXI4_DATA_WIDTH-1:0]          fwr_dat     ;
+    wire                                fwr_full    ;
+    wire [FIFO_AW:0]                    fwr_cnt     ;
 
-    wire                            frd_rdy     ;
-    wire                            frd_vld     ;
-    wire [AXI4_DATA_WIDTH-1:0]      frd_din     ;
-    wire                            frd_empty   ;
-    wire [FIFO_AW:0]                frd_cnt     ;
+    wire                                frd_rdy     ;
+    wire                                frd_vld     ;
+    wire [AXI4_DATA_WIDTH-1:0]          frd_din     ;
+    wire                                frd_empty   ;
+    wire [FIFO_AW:0]                    frd_cnt     ;
 
-    wire                            bwr_rdy     ;
-    wire                            bwr_vld     ;
-    wire [AXI4_DATA_WIDTH-1:0]      bwr_dat     ;
-    wire                            bwr_full    ;
-    wire [FIFO_AW:0]                bwr_cnt     ;
-
-    wire                            brd_rdy     ;
-    wire                            brd_vld     ;
-    wire [AXI4_DATA_WIDTH-1:0]      brd_din     ;
-    wire                            brd_empty   ;
-    wire [FIFO_AW:0]                brd_cnt     ;
+    wire [clogb2(frame_buffer-1)-1:0]   frame_cnt   ;
 
 //---------------------------------------------------
 // AXI STREAM to FORWARD FIFO
@@ -256,6 +293,7 @@ axis2fifo #(
         .FAW                (FIFO_AW            )
     ,   .AXIS_DATA_WIDTH    (AXIS_DATA_WIDTH    )
     ,   .AXI4_DATA_WIDTH    (AXI4_DATA_WIDTH    )
+    ,   .FRAME_DELAY        (frame_buffer       )
 )u_axis_salve2fifo(
 //----------------------------------------------------
 // AXIS maxter port
@@ -268,7 +306,6 @@ axis2fifo #(
 	,   .M_AXIS_TREADY      (M_AXIS_TREADY      )
     ,   .M_AXIS_USER        (M_AXIS_TUSER       )
 
-
 //----------------------------------------------------
 // AXIS slave port
     ,   .S_AXIS_ACLK        (S_AXIS_ACLK        )
@@ -279,7 +316,6 @@ axis2fifo #(
     ,   .S_AXIS_TLAST       (S_AXIS_TLAST       )
     ,   .S_AXIS_TVALID      (S_AXIS_TVALID      )
     ,   .S_AXIS_USER        (S_AXIS_TUSER       )
-
 
 //----------------------------------------------------
 // FIFO write interface
@@ -288,50 +324,13 @@ axis2fifo #(
     ,   .fwr_dat            (fwr_dat            )
     ,   .fwr_full           (fwr_full           )
     ,   .fwr_cnt            (fwr_cnt            )
+
+//----------------------------------------------------
+// USER INTERFACE
+    ,   .frame_cnt          (frame_cnt          )
 );
 
-//---------------------------------------------------
-// BACKWARD FIFO TO AXI STREAM 
-fifo2axis #(
-        .FRAME_DELAY        (frame_delay        )
-    ,   .PIXELS_HORIZONTAL  (pixels_horizontal  )
-    ,   .PIXELS_VERTICAL    (pixels_vertical    )
 
-    ,   .FDW                (AXI4_DATA_WIDTH    )
-    ,   .FAW                (FIFO_AW            )
-    ,   .AXIS_DATA_WIDTH	(AXIS_DATA_WIDTH    )
-    ,   .AXI4_DATA_WIDTH    (AXI4_DATA_WIDTH    )
-)u_fifo2axis_maxter(
-//----------------------------------------------------
-// AXIS maxter port
-	    .M_AXIS_ACLK        (M_AXIS_ACLK        )
-	,   .M_AXIS_ARESETN     (M_AXIS_ARESETN     )
-	,   .M_AXIS_TVALID      (M_AXIS_TVALID      )
-	,   .M_AXIS_TDATA       (M_AXIS_TDATA       )
-	,   .M_AXIS_TSTRB       (M_AXIS_TSTRB       )
-	,   .M_AXIS_TLAST       (M_AXIS_TLAST       )
-	,   .M_AXIS_TREADY      (M_AXIS_TREADY      )
-    ,   .M_AXIS_USER        (M_AXIS_TUSER       )
-
-//----------------------------------------------------
-// AXIS slave port
-    ,   .S_AXIS_ACLK        (S_AXIS_ACLK        )
-    ,   .S_AXIS_ARESETN     (S_AXIS_ARESETN     )
-    ,   .S_AXIS_TREADY      (S_AXIS_TREADY      )
-    ,   .S_AXIS_TDATA       (S_AXIS_TDATA       )
-    ,   .S_AXIS_TSTRB       (S_AXIS_TSTRB       )
-    ,   .S_AXIS_TLAST       (S_AXIS_TLAST       )
-    ,   .S_AXIS_TVALID      (S_AXIS_TVALID      )
-    ,   .S_AXIS_USER        (S_AXIS_TUSER       )
-
-//----------------------------------------------------
-// backward FIFO read interface
-    ,   .brd_rdy            (brd_rdy            )
-    ,   .brd_vld            (brd_vld            )
-    ,   .brd_din            (brd_din            )
-    ,   .brd_empty          (brd_empty          )
-    ,   .brd_cnt            (brd_cnt            )
-);
 
 //---------------------------------------------------
 // FORWARD FIFO STORAGE
@@ -356,28 +355,6 @@ fifo #(
     ,   .wr_cnt             (fwr_cnt            )
 );
 
-//---------------------------------------------------
-// BACKWARD FIFO STORAGE
-fifo #(
-        .FDW                (AXI4_DATA_WIDTH    )
-    ,   .FAW                (FIFO_AW            )
-)u_backward_fifo(
-        .rst                (~S_AXIS_ARESETN    )
-    ,   .clr                (1'b0               )
-    ,   .clk                (S_AXIS_ACLK        )
-    ,   .wr_rdy             (bwr_rdy            )
-    ,   .wr_vld             (bwr_vld            )
-    ,   .wr_din             (bwr_dat            )
-    ,   .rd_rdy             (brd_rdy            )
-    ,   .rd_vld             (brd_vld            )
-    ,   .rd_dout            (brd_din            )
-    ,   .empty              (brd_empty          )
-    ,   .full               (bwr_full           )
-    ,   .fullN              ()
-    ,   .emptyN             ()
-    ,   .rd_cnt             (brd_cnt            )
-    ,   .wr_cnt             (bwr_cnt            )
-);
 
 //---------------------------------------------------
 // FIFO TO AXI FULL
@@ -386,7 +363,7 @@ axi_full_core #(
     // FIFO parameters
         .FDW                            (AXI4_DATA_WIDTH    )
     ,   .FAW                            (FIFO_AW            )
-    ,   .FRAME_DELAY                    (frame_delay        )
+    ,   .FRAME_DELAY                    (frame_buffer       )
     ,   .PIXELS_HORIZONTAL              (pixels_horizontal  )
     ,   .PIXELS_VERTICAL                (pixels_vertical    )
 
@@ -411,14 +388,6 @@ axi_full_core #(
     ,   .frd_din            (frd_din            )
     ,   .frd_empty          (frd_empty          )
     ,   .frd_cnt            (frd_cnt            )   
-
-//----------------------------------------------------
-// backward FIFO write interface
-    ,   .bwr_rdy            (bwr_rdy            )
-    ,   .bwr_vld            (bwr_vld            )
-    ,   .bwr_dat            (bwr_dat            )
-    ,   .bwr_full           (bwr_full           )
-    ,   .brd_cnt            (brd_cnt            )   
 
 //----------------------------------------------------
 // AXI-FULL master port
@@ -482,7 +451,49 @@ axi_full_core #(
 );
 
 
+saxi_lite_v1_0_S00_AXI #(
+    // Width of S_AXI data bus
+        .C_S_AXI_DATA_WIDTH	    ( C_S_AXI_DATA_WIDTH    )
+    // Width of S_AXI address bus
+    ,   .C_S_AXI_ADDR_WIDTH	    ( C_S_AXI_ADDR_WIDTH    )
 
+    ,   .FRAME_DELAY            (frame_buffer           )
+)u_saxi_lite_v1_0_S00_AXI(
+    // Users to add ports here
+        .FRAME_CNT              (frame_cnt      )
 
+    // User ports ends
+    // Do not modify the ports beyond this line
+    ,   .S_AXI_ACLK         (S_AXI_ACLK         )
+    ,   .S_AXI_ARESETN      (S_AXI_ARESETN      )
+    ,   .S_AXI_AWADDR       (S_AXI_AWADDR       )
+    ,   .S_AXI_AWPROT       (S_AXI_AWPROT       )
+    ,   .S_AXI_AWVALID      (S_AXI_AWVALID      )
+    ,   .S_AXI_AWREADY      (S_AXI_AWREADY      )
+    ,   .S_AXI_WDATA        (S_AXI_WDATA        )
+    ,   .S_AXI_WSTRB        (S_AXI_WSTRB        )
+    ,   .S_AXI_WVALID       (S_AXI_WVALID       )
+    ,   .S_AXI_WREADY       (S_AXI_WREADY       )
+    ,   .S_AXI_BRESP        (S_AXI_BRESP        )
+    ,   .S_AXI_BVALID       (S_AXI_BVALID       )
+    ,   .S_AXI_BREADY       (S_AXI_BREADY       )
+    ,   .S_AXI_ARADDR       (S_AXI_ARADDR       )
+    ,   .S_AXI_ARPROT       (S_AXI_ARPROT       )
+    ,   .S_AXI_ARVALID      (S_AXI_ARVALID      )
+    ,   .S_AXI_ARREADY      (S_AXI_ARREADY      )
+    ,   .S_AXI_RDATA        (S_AXI_RDATA        )
+    ,   .S_AXI_RRESP        (S_AXI_RRESP        )
+    ,   .S_AXI_RVALID       (S_AXI_RVALID       )
+    ,   .S_AXI_RREADY       (S_AXI_RREADY       )
+);
+
+// function called clogb2 that returns an integer which has the 
+// value of the ceiling of the log base 2.                      
+function integer clogb2 (input integer bit_depth);              
+begin                                                           
+for(clogb2=0; bit_depth>0; clogb2=clogb2+1)                   
+    bit_depth = bit_depth >> 1;                                 
+end                                                           
+endfunction    
 
 endmodule

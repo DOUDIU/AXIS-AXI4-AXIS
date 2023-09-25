@@ -27,6 +27,7 @@ module axis2fifo#(
     ,   parameter AXIS_DATA_WIDTH	= 32
 		// AXI4 sink: Data Width as same as the data depth of the fifo
     ,   parameter AXI4_DATA_WIDTH   = 128
+    ,   parameter FRAME_DELAY = 2 //max 1024
 )(
 //----------------------------------------------------
 // AXIS maxter port
@@ -72,10 +73,15 @@ module axis2fifo#(
     ,   output  reg  [AXI4_DATA_WIDTH-1:0]     fwr_dat  
     ,   input   wire fwr_full
     ,   input   wire [FAW:0] fwr_cnt 
+
+//----------------------------------------------------
+// USER INTERFACE
+    ,   output  reg [clogb2(FRAME_DELAY-1)-1:0]     frame_cnt
 );
 localparam data_interval = AXI4_DATA_WIDTH/AXIS_DATA_WIDTH;
 
-assign  S_AXIS_TREADY = M_AXIS_TREADY;
+assign  S_AXIS_TREADY = M_AXIS_TREADY;	
+
 
 reg     [$clog2(data_interval)-1 : 0]   data_buf_cnt;
 reg     [AXI4_DATA_WIDTH-1 : 0]         fifo_data_buf;
@@ -88,6 +94,15 @@ always@(posedge S_AXIS_ACLK or negedge S_AXIS_ARESETN) begin
     end
     else if(S_AXIS_USER & S_AXIS_TREADY & S_AXIS_TVALID) begin
         frame_valid     <=  1;
+    end
+end
+
+always@(posedge S_AXIS_ACLK or negedge S_AXIS_ARESETN) begin
+    if(!S_AXIS_ARESETN) begin
+        frame_cnt     <=  0;
+    end
+    else if(S_AXIS_USER & S_AXIS_TREADY & S_AXIS_TVALID) begin
+        frame_cnt     <=  frame_cnt == FRAME_DELAY-1 ? 0 : frame_cnt + 1;
     end
 end
 
