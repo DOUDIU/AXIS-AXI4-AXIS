@@ -24,7 +24,7 @@ module maxis_v1_0_M00_AXIS #
 	// TREADY indicates that the slave can accept a transfer in the current cycle.
 	input wire M_AXIS_TREADY,
 
-	output wire M_AXIS_USER
+	output wire M_AXIS_TUSER
 );
 
 assign M_AXIS_USER = M_AXIS_TVALID & M_AXIS_TREADY & (M_AXIS_TDATA[27:0] == 0);

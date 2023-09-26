@@ -113,7 +113,7 @@ maxis_v1_0_M00_AXIS#
 	,  	.M_AXIS_TLAST    		(AXIS_TLAST     )
 	// TREADY indicates that the slave can accept a transfer in the current cycle.
 	,  	.M_AXIS_TREADY   		(AXIS_TREADY    )
-	,	.M_AXIS_USER			(AXIS_USER		)
+	,	.M_AXIS_TUSER			(AXIS_USER		)
 );
 
 
