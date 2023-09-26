@@ -28,11 +28,11 @@ module axis2ddr_top#(
 		// AXI4 sink: Data Width as same as the data depth of the fifo
     ,   parameter AXI4_DATA_WIDTH = 128
         // Horizontal resolution
-    ,   parameter pixels_horizontal = 1280
+    ,   parameter PIXELS_H = 1280
         // Vertical resolution
-    ,   parameter pixels_vertical = 1024
+    ,   parameter PIXELS_V = 1024
         // Delay number of the frame, the max value is 1024(constrained by the bits of the counter)
-    ,   parameter frame_buffer = 2
+    ,   parameter FRAME_MAX = 4
 
 		// Base address of targeted slave
 	,   parameter  C_M_TARGET_SLAVE_BASE_ADDR	= 32'h10000000
@@ -285,7 +285,7 @@ module axis2ddr_top#(
     wire                                frd_empty   ;
     wire [FIFO_AW:0]                    frd_cnt     ;
 
-    wire [clogb2(frame_buffer-1)-1:0]   frame_cnt   ;
+    wire [clogb2(FRAME_MAX-1)-1:0]      frame_cnt   ;
 
 //---------------------------------------------------
 // AXI STREAM to FORWARD FIFO
@@ -293,22 +293,11 @@ axis2fifo #(
         .FAW                (FIFO_AW            )
     ,   .AXIS_DATA_WIDTH    (AXIS_DATA_WIDTH    )
     ,   .AXI4_DATA_WIDTH    (AXI4_DATA_WIDTH    )
-    ,   .FRAME_DELAY        (frame_buffer       )
+    ,   .FRAME_DELAY        (FRAME_MAX          )
 )u_axis_salve2fifo(
 //----------------------------------------------------
-// AXIS maxter port
-	    .M_AXIS_ACLK        (M_AXIS_ACLK        )
-	,   .M_AXIS_ARESETN     (M_AXIS_ARESETN     )
-	,   .M_AXIS_TVALID      (M_AXIS_TVALID      )
-	,   .M_AXIS_TDATA       (M_AXIS_TDATA       )
-	,   .M_AXIS_TSTRB       (M_AXIS_TSTRB       )
-	,   .M_AXIS_TLAST       (M_AXIS_TLAST       )
-	,   .M_AXIS_TREADY      (M_AXIS_TREADY      )
-    ,   .M_AXIS_USER        (M_AXIS_TUSER       )
-
-//----------------------------------------------------
 // AXIS slave port
-    ,   .S_AXIS_ACLK        (S_AXIS_ACLK        )
+        .S_AXIS_ACLK        (S_AXIS_ACLK        )
     ,   .S_AXIS_ARESETN     (S_AXIS_ARESETN     )
     ,   .S_AXIS_TREADY      (S_AXIS_TREADY      )
     ,   .S_AXIS_TDATA       (S_AXIS_TDATA       )
@@ -363,9 +352,9 @@ axi_full_core #(
     // FIFO parameters
         .FDW                            (AXI4_DATA_WIDTH    )
     ,   .FAW                            (FIFO_AW            )
-    ,   .FRAME_DELAY                    (frame_buffer       )
-    ,   .PIXELS_HORIZONTAL              (pixels_horizontal  )
-    ,   .PIXELS_VERTICAL                (pixels_vertical    )
+    ,   .FRAME_DELAY                    (FRAME_MAX          )
+    ,   .PIXELS_HORIZONTAL              (PIXELS_H           )
+    ,   .PIXELS_VERTICAL                (PIXELS_V           )
 
     //----------------------------------------------------
     // AXI-FULL parameters
@@ -457,7 +446,7 @@ saxi_lite_core #(
     // Width of S_AXI address bus
     ,   .C_S_AXI_ADDR_WIDTH	    ( C_S_AXI_ADDR_WIDTH    )
 
-    ,   .FRAME_DELAY            (frame_buffer           )
+    ,   .FRAME_DELAY            (FRAME_MAX              )
 )u_saxi_lite_core(
     // Users to add ports here
         .frame_cnt          (frame_cnt          )

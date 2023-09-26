@@ -117,7 +117,8 @@
 	reg	 aw_en;
 
 
-	assign	slv_reg0 = frame_cnt;
+	assign	slv_reg0[clogb2(FRAME_DELAY-1)-1:0] = frame_cnt - 1;
+	assign	slv_reg0[C_S_AXI_DATA_WIDTH-1:clogb2(FRAME_DELAY-1)] = 0;
 	// I/O Connections assignments
 
 	assign S_AXI_AWREADY	= axi_awready;

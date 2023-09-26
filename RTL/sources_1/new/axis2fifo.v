@@ -30,27 +30,9 @@ module axis2fifo#(
     ,   parameter FRAME_DELAY = 2 //max 1024
 )(
 //----------------------------------------------------
-// AXIS maxter port
-	// Global ports
-	    input wire M_AXIS_ACLK
-	,   input wire M_AXIS_ARESETN
-	// Master Stream Ports. TVALID indicates that the master is driving a valid transfer, A transfer takes place when both TVALID and TREADY are asserted.
-	,   input wire M_AXIS_TVALID
-	// TDATA is the primary payload that is used to provide the data that is passing across the interface from the master.
-	,   input wire [AXIS_DATA_WIDTH-1 : 0] M_AXIS_TDATA
-	// TSTRB is the byte qualifier that indicates whether the content of the associated byte of TDATA is processed as a data byte or a position byte.
-	,   input wire [(AXIS_DATA_WIDTH/8)-1 : 0] M_AXIS_TSTRB
-	// TLAST indicates the boundary of a packet.
-	,   input wire M_AXIS_TLAST
-	// TREADY indicates that the slave can accept a transfer in the current cycle.
-	,   input wire M_AXIS_TREADY
-
-	,   input wire M_AXIS_USER
-
-//----------------------------------------------------
 // AXIS slave port
     // AXI4Stream sink: Clock
-    ,   input wire  S_AXIS_ACLK
+        input wire  S_AXIS_ACLK
     // AXI4Stream sink: Reset
     ,   input wire  S_AXIS_ARESETN
     // Ready to accept data in
@@ -80,7 +62,7 @@ module axis2fifo#(
 );
 localparam data_interval = AXI4_DATA_WIDTH/AXIS_DATA_WIDTH;
 
-assign  S_AXIS_TREADY = M_AXIS_TREADY;	
+assign  S_AXIS_TREADY = 1;	
 
 
 reg     [$clog2(data_interval)-1 : 0]   data_buf_cnt;
