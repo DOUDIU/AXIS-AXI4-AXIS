@@ -12,12 +12,12 @@
    </db_ref_list>
    <zoom_setting>
       <ZoomStartTime time="0.000000 us"></ZoomStartTime>
-      <ZoomEndTime time="98.600001 us"></ZoomEndTime>
-      <Cursor1Time time="10.115000 us"></Cursor1Time>
+      <ZoomEndTime time="197.800001 us"></ZoomEndTime>
+      <Cursor1Time time="5,733.550000 us"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="300"></NameColumnWidth>
-      <ValueColumnWidth column_width="256"></ValueColumnWidth>
+      <ValueColumnWidth column_width="250"></ValueColumnWidth>
    </column_width_setting>
    <WVObjectSize size="9" />
    <wvobject type="divider" fp_name="divider42">
@@ -28,33 +28,37 @@
       <obj_property name="label">AXIS-SLAVE</obj_property>
       <obj_property name="DisplayName">label</obj_property>
       <obj_property name="isExpanded"></obj_property>
-      <wvobject fp_name="/axi_wr_ddr_tb/AXIS_ACLK" type="logic">
-         <obj_property name="ElementShortName">AXIS_ACLK</obj_property>
-         <obj_property name="ObjectShortName">AXIS_ACLK</obj_property>
+      <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/S_AXIS_ACLK" type="logic">
+         <obj_property name="ElementShortName">S_AXIS_ACLK</obj_property>
+         <obj_property name="ObjectShortName">S_AXIS_ACLK</obj_property>
       </wvobject>
-      <wvobject fp_name="/axi_wr_ddr_tb/AXIS_ARESETN" type="logic">
-         <obj_property name="ElementShortName">AXIS_ARESETN</obj_property>
-         <obj_property name="ObjectShortName">AXIS_ARESETN</obj_property>
+      <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/S_AXIS_ARESETN" type="logic">
+         <obj_property name="ElementShortName">S_AXIS_ARESETN</obj_property>
+         <obj_property name="ObjectShortName">S_AXIS_ARESETN</obj_property>
       </wvobject>
-      <wvobject fp_name="/axi_wr_ddr_tb/AXIS_TVALID" type="logic">
-         <obj_property name="ElementShortName">AXIS_TVALID</obj_property>
-         <obj_property name="ObjectShortName">AXIS_TVALID</obj_property>
+      <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/S_AXIS_TREADY" type="logic">
+         <obj_property name="ElementShortName">S_AXIS_TREADY</obj_property>
+         <obj_property name="ObjectShortName">S_AXIS_TREADY</obj_property>
       </wvobject>
-      <wvobject fp_name="/axi_wr_ddr_tb/AXIS_TREADY" type="logic">
-         <obj_property name="ElementShortName">AXIS_TREADY</obj_property>
-         <obj_property name="ObjectShortName">AXIS_TREADY</obj_property>
+      <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/S_AXIS_TDATA" type="array">
+         <obj_property name="ElementShortName">S_AXIS_TDATA[31:0]</obj_property>
+         <obj_property name="ObjectShortName">S_AXIS_TDATA[31:0]</obj_property>
       </wvobject>
-      <wvobject fp_name="/axi_wr_ddr_tb/AXIS_TLAST" type="logic">
-         <obj_property name="ElementShortName">AXIS_TLAST</obj_property>
-         <obj_property name="ObjectShortName">AXIS_TLAST</obj_property>
+      <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/S_AXIS_TSTRB" type="array">
+         <obj_property name="ElementShortName">S_AXIS_TSTRB[3:0]</obj_property>
+         <obj_property name="ObjectShortName">S_AXIS_TSTRB[3:0]</obj_property>
       </wvobject>
-      <wvobject fp_name="/axi_wr_ddr_tb/u_maxis_v1_0_M00_AXIS/M_AXIS_USER" type="logic">
-         <obj_property name="ElementShortName">M_AXIS_USER</obj_property>
-         <obj_property name="ObjectShortName">M_AXIS_USER</obj_property>
+      <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/S_AXIS_TLAST" type="logic">
+         <obj_property name="ElementShortName">S_AXIS_TLAST</obj_property>
+         <obj_property name="ObjectShortName">S_AXIS_TLAST</obj_property>
       </wvobject>
-      <wvobject fp_name="/axi_wr_ddr_tb/AXIS_TDATA" type="array">
-         <obj_property name="ElementShortName">AXIS_TDATA[31:0]</obj_property>
-         <obj_property name="ObjectShortName">AXIS_TDATA[31:0]</obj_property>
+      <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/S_AXIS_TVALID" type="logic">
+         <obj_property name="ElementShortName">S_AXIS_TVALID</obj_property>
+         <obj_property name="ObjectShortName">S_AXIS_TVALID</obj_property>
+      </wvobject>
+      <wvobject fp_name="/axi_wr_ddr_tb/u_axis2ddr_top/S_AXIS_TUSER" type="logic">
+         <obj_property name="ElementShortName">S_AXIS_TUSER</obj_property>
+         <obj_property name="ObjectShortName">S_AXIS_TUSER</obj_property>
       </wvobject>
    </wvobject>
    <wvobject type="divider" fp_name="divider331">

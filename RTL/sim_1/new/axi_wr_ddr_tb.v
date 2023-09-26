@@ -20,7 +20,7 @@ reg     AXIS_ACLK   = 1'b0;
 reg     AXIS_ARESETN= 1'b0;
 wire    AXIS_TVALID;
 wire    AXIS_TREADY;
-wire  	AXIS_USER;
+wire  	AXIS_TUSER;
 wire    AXIS_TLAST;
 wire    [_DATA_WIDTH_-1 : 0]        AXIS_TDATA;
 wire    [(_DATA_WIDTH_/8)-1 : 0]    AXIS_TSTRB;
@@ -113,7 +113,7 @@ maxis_v1_0_M00_AXIS#
 	,  	.M_AXIS_TLAST    		(AXIS_TLAST     )
 	// TREADY indicates that the slave can accept a transfer in the current cycle.
 	,  	.M_AXIS_TREADY   		(AXIS_TREADY    )
-	,	.M_AXIS_TUSER			(AXIS_USER		)
+	,	.M_AXIS_TUSER			(AXIS_TUSER		)
 );
 
 
@@ -148,7 +148,7 @@ axis2ddr_top #(
     ,   .S_AXIS_TSTRB           (AXIS_TSTRB     )
     ,   .S_AXIS_TLAST           (AXIS_TLAST     )
     ,   .S_AXIS_TVALID          (AXIS_TVALID    )
-	,	.S_AXIS_TUSER			(AXIS_USER		)
+	,	.S_AXIS_TUSER			(AXIS_TUSER		)
 
 //----------------------------------------------------
 // AXI-FULL master port
